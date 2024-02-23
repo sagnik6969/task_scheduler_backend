@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Http\Resources\Task as TaskResouces;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class UserTaskController extends Controller
@@ -154,5 +155,26 @@ class UserTaskController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+    }
+
+    public function userTasksAnalysis()
+    {
+        $user = Auth::user();
+
+        $incompleteTasks = $user->tasks()
+            ->where('is_completed', false)
+            ->orderByDesc('updated_at')
+            ->get();
+
+        $completeTasks = $user->tasks()
+            ->where('is_completed', true)
+            ->orderByDesc('updated_at')
+            ->get();
+
+        
+        return response()->json([
+            'incomplete' => $incompleteTasks,
+            'complete' => $completeTasks,
+        ]);
     }
 }
