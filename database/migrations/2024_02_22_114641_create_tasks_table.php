@@ -6,8 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -21,9 +20,10 @@ return new class extends Migration
             $table->boolean('is_completed')->default(0);
             $table->unsignedTinyInteger('progress')->default(0);
             $table->enum('priority', Task::$priorities);
-            $table->unsignedBigInteger('admin_id');
+            $table->unsignedBigInteger('admin_id')->nullable();
             $table->unsignedBigInteger('user_id');
-            $table->foreign('admin_id')->references('id')->on('users')->nullable();
+            $table->boolean('deadline_notification_sent')->default(false);
+            $table->foreign('admin_id')->references('id')->on('users');
             $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
         });
