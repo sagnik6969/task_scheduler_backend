@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Notifications\AdminLoginNotification;
 use Illuminate\Http\Request;
+use Illumintate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -15,6 +16,19 @@ class AuthController extends Controller
     public function __construct()
     {
         $this->middleware('auth:sanctum')->only(['logout']);
+    }
+
+    public function register(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|string|unique:users, email',
+            'password' => 'required|string|confirmed'
+        ]);
+
+        $user = User::create($data);
+
+        return $user;
     }
 
     public function login(Request $request)
