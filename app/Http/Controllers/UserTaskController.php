@@ -21,8 +21,8 @@ class UserTaskController extends Controller
     public function index()
     {
         try {
-            $task = Task::all();
-            return new TaskCollection($task, 'index');
+            $tasks = auth()->user()->tasks;
+            return new TaskCollection($tasks, 'index');
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
