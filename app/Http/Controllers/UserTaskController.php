@@ -23,7 +23,11 @@ class UserTaskController extends Controller
     {
         try {
             //these need to change according to the auth user
-            $tasks = Task::where('user_id', 2)->get();
+            // $tasks = Task::where('user_id', 2)->get();
+            $tasks = auth()->user()->tasks;
+            if ($tasks->isEmpty()) {
+                return response()->json(['message' => 'No tasks found for this user'], 404);
+            }
             return new TaskCollection($tasks, 'index');
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
@@ -34,7 +38,7 @@ class UserTaskController extends Controller
     {
         $data = Validator::make($request->all(), [
             'title' => 'required',
-            'description' => 'required',
+            'description' => 'sometimes',
             'deadline' => 'required|date',
             'is_completed' => 'sometimes',
             'progress' => 'sometimes',
@@ -49,8 +53,7 @@ class UserTaskController extends Controller
         $is_completed = $request->is_completed ?? false;
         $progress = $request->progress ?? 0;
         $priority = $request->priority;
-        // $user_id = auth()->user()->id;
-        $user_id = 2;
+        $user_id = auth()->user()->id;
         try {
             $task = Task::create([
                 'title' => $title,
@@ -89,12 +92,12 @@ class UserTaskController extends Controller
     public function update(Request $request, string $id)
     {
         $data = Validator::make($request->all(), [
-            'title' => 'sometimes',
+            'title' => 'required',
             'description' => 'sometimes',
-            'deadline' => 'sometimes',
+            'deadline' => 'required|date',
             'is_completed' => 'sometimes',
             'progress' => 'sometimes',
-            'priority' => 'sometimes|in:' . implode(',', array_keys(Task::$priorities)),
+            'priority' => 'required|in:' . implode(',', array_keys(Task::$priorities)),
         ]);
         if ($data->fails()) {
             return response()->json(['message' => 'Validation failed'], 400);

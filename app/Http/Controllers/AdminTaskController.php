@@ -13,8 +13,8 @@ class AdminTaskController extends Controller
 {
     public function index()
     {
-        $tasks = Task::all();
-        return $tasks;
+        $admintasks = auth()->user()->admintasks;
+        return $admintasks;
     }
 
     public function destroy(Task $task)
@@ -22,16 +22,17 @@ class AdminTaskController extends Controller
         $task->delete();
         return response()->json(['message' => 'Task deleted successfully']);
     }
-    public function gettotalTasksAssignedByAdmin($adminId)
-    {
-        $totalTasks = Task::where('admin_id', $adminId)->count();
-        return response()->json(['total_tasks_assigned' => $totalTasks]);
-    }
+    // public function gettotalTasksAssignedByAdmin(User $user)
+    // {
+    //     $user->admintasks()->count();
+    //     $totalTasks = Task::where('admin_id', $user->id)->count();
+    //     return response()->json(['total_tasks_assigned' => $totalTasks]);
+    // }
     public function assignTaskTouser(Request $request, User $user)
     {
         $task = Validator::make($request->all(), [
-            'title' => 'required',
-            'description' => 'required',
+            'title' => 'required|min:10',
+            'description' => 'sometimes',
             'deadline' => 'required|date',
         ]);
 
@@ -48,9 +49,9 @@ class AdminTaskController extends Controller
         return response()->json(['message' => 'Task assigned successfully']);
     }
 
-    public function deleteUser(User $user)
-    {
-        $user->delete();
-        return response()->json(['message' => 'User deleted successfully']);
-    }
+    // public function deleteUser(User $user)
+    // {
+    //     $user->delete();
+    //     return response()->json(['message' => 'User deleted successfully']);
+    // }
 }
