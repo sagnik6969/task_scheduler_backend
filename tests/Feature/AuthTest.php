@@ -75,6 +75,19 @@ class AuthTest extends TestCase
 
     }
 
+    public function test_users_with_invalid_credentials_cant_login()
+    {
+        $response = $this->postJson('/api/login', [
+            "email" => 'abc@d.com',
+            "password" => '12345678'
+        ]);
+
+        $response->assertStatus(422);
+
+    }
+
+
+
     public function test_user_can_logout()
     {
         $user = User::factory()->create([
