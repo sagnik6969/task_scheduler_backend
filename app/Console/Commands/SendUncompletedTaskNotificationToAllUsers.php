@@ -36,7 +36,8 @@ class SendUncompletedTaskNotificationToAllUsers extends Command
             // foreach ($user->tasks as $task) {
             //     $this->info("{$user->name} => {$task->title}");
             // }
-            $user->notify(new UnCompletedTasksNotification($user->tasks));
+            if (count($user->tasks))
+                $user->notify(new UnCompletedTasksNotification($user->tasks));
         });
 
 
