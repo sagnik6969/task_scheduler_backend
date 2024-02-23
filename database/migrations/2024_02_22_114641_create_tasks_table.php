@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -18,7 +19,12 @@ return new class extends Migration {
             $table->dateTime('deadline');
             $table->boolean('is_completed')->default(0);
             $table->unsignedTinyInteger('progress')->default(0);
-            $table->foreignIdFor(User::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->enum('priority', Task::$priorities);
+            $table->unsignedBigInteger('admin_id')->nullable();
+            $table->unsignedBigInteger('user_id');
+            $table->boolean('deadline_notification_sent')->default(false);
+            $table->foreign('admin_id')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
         });
     }
