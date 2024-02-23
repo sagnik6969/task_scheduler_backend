@@ -14,16 +14,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::factory()->count(5)->state([
-            'id' => function () {
-                static $id = 1;
-                return $id++;
-            } 
-        ])->create();
+        $users = User::factory()->count(5)->create();
+
 
         // Create 10 tasks associated with 5 users randomly
         $users->each(function ($user) {
             Task::factory()->count(2)->create(['user_id' => $user->id]);
         });
-    }  
+    }
 }

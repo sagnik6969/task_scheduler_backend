@@ -9,13 +9,13 @@ class Task extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'title', 'deadline', 'priority', 'is_completed'];
+    protected $guarded = [];
 
     public static $priorities = [
         'normal' => 'Normal',
         'important' => 'Important',
         'very_important' => 'Very Important',
-    ];  
+    ];
 
     public function user()
     {
