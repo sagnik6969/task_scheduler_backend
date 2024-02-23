@@ -47,7 +47,7 @@ class Task extends JsonResource
                     'is_completed' => $this->is_completed,
                     'progress' => $this->progress,
                     'priority' => $this->priority,
-                    'user_id' => 2,
+                    'user_id' => $this->user_id,
                     'created_at' => $this->created_at,
                     'updated_at' => $this->updated_at,
                 ],
