@@ -20,26 +20,25 @@ use Illuminate\Support\Facades\Route;
 */
 
 // user - authentication 
-// Route::middleware('auth:sanctum')->group(function () {
-Route::prefix('user')->group(function () {
-    Route::get('tasks', [UserTaskController::class, 'index']);
-    Route::post('tasks', [UserTaskController::class, 'store']);
-    Route::get('tasks/{task}', [UserTaskController::class, 'show']);
-    Route::put('tasks/{task}', [UserTaskController::class, 'update']);
-    Route::delete('tasks/{task}', [UserTaskController::class, 'destroy']);
-});
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('user')->group(function () {
+        Route::get('tasks', [UserTaskController::class, 'index']);
+        Route::post('tasks', [UserTaskController::class, 'store']);
+        Route::get('tasks/{task}', [UserTaskController::class, 'show']);
+        Route::put('tasks/{task}', [UserTaskController::class, 'update']);
+        Route::delete('tasks/{task}', [UserTaskController::class, 'destroy']);
+    });
 
-Route::prefix('admin')->group(function () {
-    Route::get('tasks', [AdminTaskController::class, 'index']);
-    Route::delete('tasks/{task}', [AdminTaskController::class, 'destroy']);
-    Route::post('/assign-task/{user}', [AdminTaskController::class, 'assignTaskToUser']);
+    Route::prefix('admin')->group(function () {
+        Route::get('tasks', [AdminTaskController::class, 'index']);
+        Route::delete('tasks/{task}', [AdminTaskController::class, 'destroy']);
+        Route::post('/assign-task/{user}', [AdminTaskController::class, 'assignTaskToUser']);
+    });
 });
-// });
 
 
 
 Route::post('/register', [AuthController::class, 'register']);
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout']);
-
