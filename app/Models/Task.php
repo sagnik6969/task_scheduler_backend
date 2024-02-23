@@ -15,7 +15,7 @@ class Task extends Model
         'normal' => 'Normal',
         'important' => 'Important',
         'very_important' => 'Very Important',
-    ];  
+    ];
 
     public function user()
     {
