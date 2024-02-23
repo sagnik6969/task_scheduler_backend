@@ -8,6 +8,7 @@ use App\Http\Resources\TaskCollection;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Http\Resources\Task as TaskResouces;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 class UserTaskController extends Controller
@@ -21,7 +22,8 @@ class UserTaskController extends Controller
     public function index()
     {
         try {
-            $tasks = auth()->user()->tasks;
+            //these need to change according to the auth user
+            $tasks = Task::where('user_id', 2)->get();
             return new TaskCollection($tasks, 'index');
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
@@ -33,7 +35,7 @@ class UserTaskController extends Controller
         $data = Validator::make($request->all(), [
             'title' => 'required',
             'description' => 'required',
-            'deadline' => 'required',
+            'deadline' => 'required|date',
             'is_completed' => 'sometimes',
             'progress' => 'sometimes',
             'priority' => 'required|in:' . implode(',', array_keys(Task::$priorities)),
@@ -47,6 +49,8 @@ class UserTaskController extends Controller
         $is_completed = $request->is_completed ?? false;
         $progress = $request->progress ?? 0;
         $priority = $request->priority;
+        // $user_id = auth()->user()->id;
+        $user_id = 2;
         try {
             $task = Task::create([
                 'title' => $title,
@@ -55,6 +59,7 @@ class UserTaskController extends Controller
                 'is_completed' => $is_completed,
                 'progress' => $progress,
                 'priority' => $priority,
+                'user_id' => $user_id
             ]);
             return new TaskResouces($task, 'create');
         } catch (\Exception $e) {
@@ -84,12 +89,12 @@ class UserTaskController extends Controller
     public function update(Request $request, string $id)
     {
         $data = Validator::make($request->all(), [
-            'title' => 'required',
-            'description' => 'required',
-            'deadline' => 'required',
+            'title' => 'sometimes',
+            'description' => 'sometimes',
+            'deadline' => 'sometimes',
             'is_completed' => 'sometimes',
             'progress' => 'sometimes',
-            'priority' => 'required|in:' . implode(',', array_keys(Task::$priorities)),
+            'priority' => 'sometimes|in:' . implode(',', array_keys(Task::$priorities)),
         ]);
         if ($data->fails()) {
             return response()->json(['message' => 'Validation failed'], 400);
