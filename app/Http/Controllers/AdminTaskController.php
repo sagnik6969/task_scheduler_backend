@@ -4,6 +4,7 @@
 
 
 namespace App\Http\Controllers;
+
 use App\Notifications\TaskAssginmentNotification;
 use Illuminate\Http\Request;
 use App\Models\Task;
@@ -11,10 +12,11 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+
 class AdminTaskController extends Controller
 {
     public function index()
-    { 
+    {
         // $admintasks = auth()->user()->admintasks;
         // return $admintasks;
 
@@ -45,34 +47,34 @@ class AdminTaskController extends Controller
             }
 
             $userWithTasks = User::with('tasks')->find($user->id);
- 
-            return response()->json(['user' => $userWithTasks]); 
+
+            return response()->json(['user' => $userWithTasks]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Something went wrong'], 500);
         }
-    } 
+    }
 
     public function destroy(Task $task)
     {
-        try{
+        try {
             $authUser = Auth::user();
             if (!$authUser || !$authUser->is_admin) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
-            $task->delete(); 
+            $task->delete();
             return response()->json(['message' => 'Task deleted successfully']);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(['error' => 'Something went wrong'], 500);
         }
     }
-    
+
     // public function gettotalTasksAssignedByAdmin(User $user)
     // {
     //     $user->admintasks()->count();
     //     $totalTasks = Task::where('admin_id', $user->id)->count();
     //     return response()->json(['total_tasks_assigned' => $totalTasks]);
     // }
-    
+
     public function assignTaskTouser(Request $request, User $user)
     {
 
@@ -89,7 +91,7 @@ class AdminTaskController extends Controller
         $task = new Task();
         $task->title = $request->title;
         $task->description = $request->description;
-        $task->deadline = $request->deadline;
+        $task->deadline = \Carbon\Carbon::parse($request->deadline);
         $task->admin_id = auth()->user()->id;
         $task->user_id = $user->id;
         $token = Str::random(60);
@@ -100,9 +102,10 @@ class AdminTaskController extends Controller
         // and automatic admin can see in his dashboard for that refer TaskAssignmentController.php 
         // $task->save();
         return response()->json(['message' => 'Task assigned successfully']);
-    }                                                                         
- 
-    public function allUSerAnalysys(){    
+    }
+
+    public function allUSerAnalysys()
+    {
 
         $authUser = Auth::user();
         if (!$authUser || !$authUser->is_admin) {
@@ -121,21 +124,21 @@ class AdminTaskController extends Controller
         return response()->json($usersData);
     }
 
-    public function makeAdmin(User $user){
+    public function makeAdmin(User $user)
+    {
 
         $authUser = Auth::user();
-            if (!$authUser || !$authUser->is_admin) {
-                return response()->json(['error' => 'Unauthorized'], 401);
-            }
+        // if (!$authUser || !$authUser->is_admin) {
+        //     return response()->json(['error' => 'Unauthorized'], 401);
+        // }
 
-            if ($user->is_admin) {
-                return response()->json(['error' => 'The provided user is already an admin'], 401);
-            }
+        if ($user->is_admin) {
+            return response()->json(['error' => 'The provided user is already an admin'], 401);
+        }
 
-            $user->is_admin = 1;
-            $user->save();
-            return response()->json(['message' => 'User {$user->id} is now admin'], 200);
-
+        $user->is_admin = 1;
+        $user->save();
+        return response()->json(['message' => 'User {$user->id} is now admin'], 200);
     }
 
     public function userTasksAnalysis(User $user)
@@ -151,7 +154,7 @@ class AdminTaskController extends Controller
             ->orderByDesc('updated_at')
             ->get();
 
-        
+
         return response()->json([
             'incomplete' => $incompleteTasks,
             'complete' => $completeTasks,

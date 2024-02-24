@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('app:send-uncompleted-task-notification-to-all-users')->daily();
-        $schedule->command('app:send-task-deadline-reminder-notification-to-all-users')->everyFiveMinutes();
+        $schedule->command('app:send-task-deadline-reminder-notification-to-all-users')->everyMinute();
         // php artisan schedule:work => to run the scheduler
     }
 

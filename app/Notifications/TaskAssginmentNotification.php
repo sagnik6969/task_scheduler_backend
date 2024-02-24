@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\Task;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -12,15 +11,16 @@ class TaskAssginmentNotification extends Notification
 {
     use Queueable;
 
+
     private $task;
     protected $token;
     /**
      * Create a new notification instance.
      */
-    public function __construct(Task $task,string $token=null)
+    public function __construct(Task $task, string $token = null)
     {
         $this->task = $task;
-        $this->token= $token;
+        $this->token = $token;
     }
 
     /**
@@ -38,8 +38,8 @@ class TaskAssginmentNotification extends Notification
      */
     public function toMail($notifiable)
     {
-        if($this->token!=null)
-        // currectly its a local link but change it in future
+        if ($this->token != null)
+            // currectly its a local link but change it in future
             $url = url("http://127.0.0.1:8000/api/tasks/assign/{$this->task->id}?token={$this->token}");
 
         return (new MailMessage)
