@@ -15,6 +15,8 @@ class UserController extends Controller
     }
     public function destroy(User $user)
     {
+        // Delete the user along with their tasks
+        $user->tasks()->delete();
         $user->delete();
         return response()->json(['message' => 'User deleted successfully']);
     }
