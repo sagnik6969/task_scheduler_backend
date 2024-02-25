@@ -27,7 +27,9 @@ class UserTaskController extends Controller
         //these need to change according to the auth user
         // $tasks = Task::where('user_id', 2)->get();
         $tasksQuery = auth()->user()->tasks()->getQuery(); 
-
+// - /api/user/tasks?filter=""
+// - / -> /api/user/tasks
+// - / -> /filter=""
         switch ($filter) { 
             case 'most_important':
                 $tasksQuery->orderByRaw("

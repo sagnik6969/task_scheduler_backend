@@ -30,7 +30,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('tasks/{task}', [UserTaskController::class, 'destroy']);
 
         // filters routes are left 
-
         // pie chart data routes 
         Route::get('analysis',[UserTaskController::class,'userTasksAnalysis']); // checked 
 
