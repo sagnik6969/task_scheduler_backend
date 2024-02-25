@@ -18,8 +18,25 @@ class DatabaseSeeder extends Seeder
 
 
         // Create 10 tasks associated with 5 users randomly
-        $users->each(function ($user) {
-            Task::factory()->count(2)->create(['user_id' => $user->id]);
-        });
+        Task::factory(10)->create([
+            'user_id' => 1,
+            'created_at' => now()
+        ]);
+        Task::factory(10)->create([
+            'user_id' => 1,
+            'created_at' => now()->subHour()
+        ]);
+        Task::factory(10)->create([
+            'user_id' => 1,
+            'created_at' => now()->subDay()
+        ]);
+        Task::factory(10)->create([
+            'user_id' => 1,
+            'created_at' => now()->subMonth()
+        ]);
+        Task::factory(10)->create([
+            'user_id' => 1,
+            'created_at' => now()->subMonths(10)
+        ]);
     }
 }
