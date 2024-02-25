@@ -30,7 +30,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('tasks/{task}', [UserTaskController::class, 'destroy']);
 
         // filters routes are left 
-        
 
         // pie chart data routes 
         Route::get('analysis',[UserTaskController::class,'userTasksAnalysis']); // checked 
@@ -44,7 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('users/{user}',[AdminTaskController::class,'userTasks']);// checked
         Route::patch('users/{user}',[AdminTaskController::class,'makeAdmin']); // checked 
         Route::get('users', [UserController::class, 'index']); // no need as 1st route is giving same functionality
-        Route::delete('users/{user}', [UserController::class, 'destroy']); // checked
+        Route::delete(' users/{user}', [UserController::class, 'destroy']); // checked
         
         // filters routes are left 
 

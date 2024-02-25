@@ -20,20 +20,50 @@ class UserTaskController extends Controller
         //  user authentication
     }
 
-    public function index()
-    {
-        try {
-            //these need to change according to the auth user
-            // $tasks = Task::where('user_id', 2)->get();
-            $tasks = auth()->user()->tasks;
-            if ($tasks->isEmpty()) {
-                return response()->json(['message' => 'No tasks found for this user'], 404);
-            }
-            return new TaskCollection($tasks, 'index');
-        } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+    public function index(Request $request)
+{
+    try {
+        $filter = $request->query('filter');
+        //these need to change according to the auth user
+        // $tasks = Task::where('user_id', 2)->get();
+        $tasksQuery = auth()->user()->tasks()->getQuery(); // Use getQuery() to get the query builder instance
+
+        switch ($filter) {
+            case 'most_important':
+                $tasksQuery->orderByRaw("
+                    CASE 
+                        WHEN priority = 'very important' THEN 1 
+                        WHEN priority = 'important' THEN 2 
+                        WHEN priority = 'normal' THEN 3 
+                        ELSE 4 
+                    END, updated_at DESC
+                ");
+                break; 
+            case 'recently_added':
+                // Sort tasks by creation date in descending order
+                $tasksQuery->orderBy('updated_at', 'desc');
+                break;
+            case 'near_deadline':
+                $tasksQuery->orderBy('deadline', 'desc');
+                break; 
+            case 'deadline_crossed':
+                $tasksQuery->where('is_completed', 0)->where('deadline', '<', now());
+                break;   
+            default:
+                break;
         }
+
+        $tasks = $tasksQuery->get();
+        if ($tasks->isEmpty()) {
+            return response()->json(['message' => 'No tasks found for this user'], 404);
+        }
+
+        return new TaskCollection($tasks, 'index');
+    } catch (\Exception $e) {
+        return response()->json(['message' => $e->getMessage()], 500);
     }
+}
+
 
     public function store(Request $request)
     {
