@@ -26,9 +26,9 @@ class UserTaskController extends Controller
         $filter = $request->query('filter');
         //these need to change according to the auth user
         // $tasks = Task::where('user_id', 2)->get();
-        $tasksQuery = auth()->user()->tasks()->getQuery(); // Use getQuery() to get the query builder instance
+        $tasksQuery = auth()->user()->tasks()->getQuery(); 
 
-        switch ($filter) {
+        switch ($filter) { 
             case 'most_important':
                 $tasksQuery->orderByRaw("
                     CASE 
@@ -40,7 +40,6 @@ class UserTaskController extends Controller
                 ");
                 break; 
             case 'recently_added':
-                // Sort tasks by creation date in descending order
                 $tasksQuery->orderBy('updated_at', 'desc');
                 break;
             case 'near_deadline':
