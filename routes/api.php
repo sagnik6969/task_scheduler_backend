@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 // user - authentication 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', fn() => auth()->user());
     Route::prefix('user')->group(function () {
         Route::get('tasks', [UserTaskController::class, 'index']);
         Route::post('tasks', [UserTaskController::class, 'store']);
@@ -33,7 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // pie chart data routes 
         Route::get('analysis',[UserTaskController::class,'userTasksAnalysis']); // checked 
 
-    });
+    }); 
 
     Route::prefix('admin')->group(function () {
         Route::get('tasks', [AdminTaskController::class, 'index']);//checked
