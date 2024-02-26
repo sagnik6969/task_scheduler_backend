@@ -37,6 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // pie chart data routes 
         Route::get('analysis', [UserTaskController::class, 'userTasksAnalysis']); // checked 
+        Route::get('notifications', [UserTaskController::class, 'getNotifications']);
+        Route::post('notifications/mark_as_read', [UserTaskController::class, 'makeNotificationsAsRead']);
 
     });
 
