@@ -51,9 +51,10 @@ class UserTaskController extends Controller
                 $tasksQuery->where('is_completed', 0)->where('deadline', '<', now());
                 break;   
             default:
+                $tasksQuery->orderBy('deadline', 'desc');
                 break;
         }
-
+ 
         $tasks = $tasksQuery->get();
         if ($tasks->isEmpty()) {
             return response()->json(['message' => 'No tasks found for this user'], 404);
