@@ -20,13 +20,12 @@ class TaskFactory extends Factory
     public function definition()
     {
         return [
-            'user_id' => rand(1, 5), 
             'title' => $this->faker->sentence,
             'description' => $this->faker->paragraph,
             'deadline' => $this->faker->dateTimeThisMonth,
-            'is_completed' => $this->faker->boolean(), 
-            'progress' => $this->faker->numberBetween(0, 100),      
+            'is_completed' => $this->faker->boolean(),
+            'progress' => $this->faker->numberBetween(0, 100),
             'priority' => $this->faker->randomElement(Task::$priorities),
         ];
-    } 
+    }
 }

@@ -22,7 +22,7 @@ class UserTaskTest extends TestCase
         public function test_can_create_a_task()
         {
             // Create a user
-            $user = User::find(2);
+            $user = User::factory()->create();
 
             // Make a POST request to the create endpoint
             $response = $this->actingAs($user)->post('/api/user/tasks', [

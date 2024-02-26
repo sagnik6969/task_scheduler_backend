@@ -5,89 +5,208 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Resources\TaskCollection;
-use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Http\Resources\Task as TaskResouces;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class UserTaskController extends Controller
 {
-    
-    public function __construct(){
+
+    public function __construct()
+    {
         //  user authentication
     }
 
     public function index(Request $request)
-    {
-        $user = $request->user();
-        return $user->tasks;
-    }
+{
+    try {
+        $filter = $request->query('filter');
+        //these need to change according to the auth user
+        // $tasks = Task::where('user_id', 2)->get();
+        $tasksQuery = auth()->user()->tasks()->getQuery(); 
+// - /api/user/tasks?filter=""
+// - / -> /api/user/tasks
+// - / -> /filter=""
+        switch ($filter) { 
+            case 'most_important':
+                $tasksQuery->orderByRaw("
+                    CASE 
+                        WHEN priority = 'very important' THEN 1 
+                        WHEN priority = 'important' THEN 2 
+                        WHEN priority = 'normal' THEN 3 
+                        ELSE 4 
+                    END, updated_at DESC
+                ");
+                break; 
+            case 'recently_added':
+                $tasksQuery->orderBy('updated_at', 'desc');
+                break;
+            case 'near_deadline':
+                $tasksQuery->orderBy('deadline', 'desc');
+                break; 
+            case 'deadline_crossed':
+                $tasksQuery->where('is_completed', 0)->where('deadline', '<', now());
+                break;   
+            default:
+                $tasksQuery->orderBy('deadline', 'desc');
+                break;
+        }
+ 
+        $tasks = $tasksQuery->get();
+        if ($tasks->isEmpty()) {
+            return response()->json(['message' => 'No tasks found for this user'], 404);
+        }
 
-    // task creation -- frontend
-    public function create()
-    {
-        // return view('task.create');
+        return new TaskCollection($tasks, 'index');
+    } catch (\Exception $e) {
+        return response()->json(['message' => $e->getMessage()], 500);
     }
+}
+
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+        $data = Validator::make($request->all(), [
+            'title' => 'required',
+            'description' => 'sometimes',
             'deadline' => 'required|date',
-            'is_completed' => 'sometimes|boolean',
-            'progress' => 'sometimes|integer|min:0|max:100',
+            'is_completed' => 'sometimes',
+            'progress' => 'sometimes',
             'priority' => 'required|in:' . implode(',', array_keys(Task::$priorities)),
-        ]); 
-
-        // var_dump($validatedData);
-     
-        $task = Task::create([
-            'user_id' => 2,
-            'title' => $validatedData['title'],
-            'description' => $validatedData['description'],
-            'deadline' => $validatedData['deadline'],
-            'is_completed' => $validatedData['is_completed'] ?? false,
-            'progress' => $validatedData['progress'] ?? 0, 
-            'priority' => $validatedData['priority'],
         ]);
-
-        // var_dump($task);
-
-        return new TaskResouces($task,'create');
-        // $tasks = new Collection([$task]);
-
-
-        // return new TaskCollection($task,'create');
+        if ($data->fails()) {
+            return response()->json(['message' => 'Validation failed'], 400);
+        }
+        $title = $request->title;
+        $description = $request->description;
+        $deadline = $request->deadline;
+        $is_completed = $request->is_completed ?? false;
+        $progress = $request->progress ?? 0;
+        $priority = $request->priority;
+        $user_id = auth()->user()->id;
+        try {
+            $task = Task::create([
+                'title' => $title,
+                'description' => $description,
+                'deadline' => $deadline,
+                'is_completed' => $is_completed,
+                'progress' => $progress,
+                'priority' => $priority,
+                'user_id' => $user_id
+            ]);
+            return new TaskResouces($task, 'create');
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
-    public function edit(Task $myTask){
-        return new TaskResouces($myTask,'edit');
-    }
-
-    public function update(Request $request, Task $task)
+    /**
+     * Display the specified resource.
+     */
+    //one task
+    public function show(string $id)
     {
-        $validatedData = request()->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+        try {
+            $task = Task::findOrfail($id);
+            if ($task) {
+                return new TaskResouces($task, 'show');
+            } else {
+                return response()->json(['message' => 'Task not found'], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function update(Request $request, string $id)
+    {
+        $data = Validator::make($request->all(), [
+            'title' => 'required',
+            'description' => 'sometimes',
             'deadline' => 'required|date',
-            'is_completed' => 'sometimes|boolean',
-            'progress' => 'sometimes|integer|min:0|max:100',
+            'is_completed' => 'sometimes',
+            'progress' => 'sometimes',
             'priority' => 'required|in:' . implode(',', array_keys(Task::$priorities)),
-        ]); 
-
-        $task->update($validatedData);
-        return new TaskCollection($task,'update');
+        ]);
+        if ($data->fails()) {
+            return response()->json(['message' => 'Validation failed'], 400);
+        }
+        $title = $request->title;
+        $description = $request->description;
+        $deadline = $request->deadline;
+        $is_completed = $request->is_completed ?? false;
+        $progress = $request->progress ?? 0;
+        $priority = $request->priority;
+        try {
+            $task = Task::findOrfail($id);
+            if ($task) {
+                $task->update([
+                    'title' => $title,
+                    'description' => $description,
+                    'deadline' => $deadline,
+                    'is_completed' => $is_completed,
+                    'progress' => $progress,
+                    'priority' => $priority,
+                ]);
+                return new TaskResouces($task, 'update');
+            } else {
+                return response()->json(['message' => 'Task not found'], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+    public function edit(string $id)
+    {
+        try {
+            $task = Task::findOrfail($id);
+            if ($task) {
+                return new TaskResouces($task, 'edit');
+            } else {
+                return response()->json(['message' => 'Task not found'], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
-    public function show(Task $id)
+    public function destroy(string $id)
     {
-        return new TaskResouces($id,'show');
+        try {
+            $task = Task::findOrfail($id);
+            if ($task) {
+                $task->delete();
+                return response()->json(['message' => 'Task deleted'], 200);
+            } else {
+                return response()->json(['message' => 'Task not found'], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
-    public function destroy(Task $task)
+    public function userTasksAnalysis()
     {
-        $task->delete();
-        return new TaskCollection($task,'delete');
+        $user = Auth::user();
+
+        $incompleteTasks = $user->tasks()
+            ->where('is_completed', false)
+            ->orderByDesc('updated_at')
+            ->get();
+
+        $completeTasks = $user->tasks()
+            ->where('is_completed', true)
+            ->orderByDesc('updated_at')
+            ->get();
+
+        
+        return response()->json([
+            'incomplete' => $incompleteTasks,
+            'complete' => $completeTasks,
+        ]);
     }
 }

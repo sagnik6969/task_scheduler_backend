@@ -28,7 +28,7 @@ class Task extends JsonResource
         parent::__construct($resource);
         $this->state = $state;
     }
-    
+
     /**
      * Transform the resource into an array.
      *
@@ -37,20 +37,20 @@ class Task extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'data'=>[
-            'type'=> $this->state,
-            'task_id' => $this->id,
-            'attributes'=>[
-                'title' => $this->title,
-                'description' => $this->description,
-                'deadline' => $this->deadline,
-                'is_completed' => $this->is_completed,
-                'progress' => $this->progress,
-                'priority' => $this->priority,
-                'user_id' => 2,
-                'created_at' => $this->created_at,
-                'updated_at' => $this->updated_at,
-                ],    
+            'data' => [
+                'type' => $this->state,
+                'task_id' => $this->id,
+                'attributes' => [
+                    'title' => $this->title,
+                    'description' => $this->description,
+                    'deadline' => $this->deadline,
+                    'is_completed' => $this->is_completed,
+                    'progress' => $this->progress,
+                    'priority' => $this->priority,
+                    'user_id' => $this->user_id,
+                    'created_at' => $this->created_at,
+                    'updated_at' => $this->updated_at,
+                ],
             ],
         ];
     }
