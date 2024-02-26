@@ -5,6 +5,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdminAssignedTask;
 use App\Notifications\TaskAssginmentNotification;
 use Illuminate\Http\Request;
 use App\Models\Task;
@@ -88,7 +89,7 @@ class AdminTaskController extends Controller
             return response()->json(['errors' => $task->errors()], 400);
         }
 
-        $task = new Task();
+        $task = new AdminAssignedTask();
         $task->title = $request->title;
         $task->description = $request->description;
         $task->deadline = \Carbon\Carbon::parse($request->deadline);
@@ -100,7 +101,7 @@ class AdminTaskController extends Controller
         // here may be we need to make another migration specially for task assigned by admin which will help to create section
         // of task status as like user accepted or not and other creativity so no need to save it will be user if user accept it then it will be save
         // and automatic admin can see in his dashboard for that refer TaskAssignmentController.php 
-        // $task->save();
+        $task->save();
         return response()->json(['message' => 'Task assigned successfully']);
     }
 
@@ -122,6 +123,9 @@ class AdminTaskController extends Controller
         ])->get();
 
         return response()->json($usersData);
+    }
+    public function taskAcceptance(User $user, Task $task)
+    {
     }
 
     public function makeAdmin(User $user)

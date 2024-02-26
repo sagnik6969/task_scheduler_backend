@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\AdminAssignedTask;
 use App\Models\Task;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -17,7 +18,7 @@ class TaskAssginmentNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(Task $task, string $token = null)
+    public function __construct(AdminAssignedTask $task, string $token = null)
     {
         $this->task = $task;
         $this->token = $token;
