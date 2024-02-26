@@ -4,6 +4,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Http\Resources\Notification;
 use App\Http\Resources\TaskCollection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -249,25 +250,24 @@ class UserTaskController extends Controller
             return response()->json($response);
 
         }
-
-
-
-
-
-        // $incompleteTasks = $user->tasks()
-        //     ->where('is_completed', false)
-        //     ->orderByDesc('updated_at')
-        //     ->get();
-
-        // $completeTasks = $user->tasks()
-        //     ->where('is_completed', true)
-        //     ->orderByDesc('updated_at')
-        //     ->get();
-
-
-        // return response()->json([
-        //     'incomplete' => $incompleteTasks,
-        //     'complete' => $completeTasks,
-        // ]);
     }
+
+    public function getNotifications()
+    {
+        $notifications = auth()->user()->unreadNotifications;
+
+        return Notification::collection($notifications);
+
+    }
+
+    public function makeNotificationsAsRead()
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+
+        return response()->json([
+            'success' => 'all unread notifications are marked as read'
+        ]);
+    }
+
+
 }
