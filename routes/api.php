@@ -22,7 +22,9 @@ use Illuminate\Support\Facades\Route;
 
 // user - authentication 
 Route::middleware('auth:sanctum')->group(function () {
+
     Route::get('/user', fn() => auth()->user());
+
     Route::prefix('user')->group(function () {
         Route::get('tasks', [UserTaskController::class, 'index']);
         Route::post('tasks', [UserTaskController::class, 'store']);
@@ -31,8 +33,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('tasks/{task}', [UserTaskController::class, 'destroy']);
 
         // filters routes are left 
+
+
         // pie chart data routes 
-        Route::get('analysis',[UserTaskController::class,'userTasksAnalysis']); // checked 
+        Route::get('analysis', [UserTaskController::class, 'userTasksAnalysis']); // checked 
 
     }); 
 
@@ -40,17 +44,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('tasks', [AdminTaskController::class, 'index']);//checked
         Route::delete('tasks/{task}', [AdminTaskController::class, 'destroy']);//checked 
         Route::post('assign-task/{user}', [AdminTaskController::class, 'assignTaskToUser']);//code written just wait for frontend 
-        Route::get('users/{user}',[AdminTaskController::class,'userTasks']);// checked
-        Route::patch('users/{user}',[AdminTaskController::class,'makeAdmin']); // checked 
+        Route::get('users/{user}', [AdminTaskController::class, 'userTasks']);// checked
+        Route::patch('users/{user}', [AdminTaskController::class, 'makeAdmin']); // checked 
         Route::get('users', [UserController::class, 'index']); // no need as 1st route is giving same functionality
         Route::delete('users/{user}', [UserController::class, 'destroy']); // checked
-        
+
         // filters routes are left 
 
         // pie chart data routes
-        Route::get('analysis',[AdminTaskController::class,'allUSerAnalysys']); // checked
-        Route::get('analysis/{user}',[AdminTaskController::class,'userTaskAnalysis']);//checked
-    }); 
+        Route::get('analysis', [AdminTaskController::class, 'allUSerAnalysys']); // checked
+        Route::get('analysis/{user}', [AdminTaskController::class, 'userTaskAnalysis']);//checked
+    });
 
     Route::get('/tasks/assign/{taskId}/{token}', [TaskAssignmentController::class, 'assignTask']); // part of assignTaskToUser
 });
