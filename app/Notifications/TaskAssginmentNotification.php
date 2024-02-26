@@ -30,7 +30,7 @@ class TaskAssginmentNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**
@@ -62,7 +62,8 @@ class TaskAssginmentNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'type' => 'task_assignment_notification',
+            'text' => 'You have a new task assigned by the admin, check your mailbox for more details.',
         ];
     }
 }
