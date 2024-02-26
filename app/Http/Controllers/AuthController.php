@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Notifications\AdminLoginNotification;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
-use Illumintate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -20,13 +19,17 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $data = $request->validate([
+        $validatedData = $request->validate([
             'name' => 'required|string',
             'email' => 'required|string|unique:users,email',
-            'password' => 'required|string|confirmed'
+            'password' => 'required|string|confirmed|min:8'
         ]);
-
-        $user = User::create($data);
+        $user = User::create([
+            'name' => $validatedData['name'],
+            'email' => $validatedData['email'],
+            'password' => Hash::make($validatedData['password']),
+        ]);
+        event(new Registered($user));
 
         return $user;
     }
