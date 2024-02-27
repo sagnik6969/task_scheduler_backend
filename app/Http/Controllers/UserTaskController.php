@@ -43,7 +43,7 @@ class UserTaskController extends Controller
             'deadline' => 'required|date',
             'is_completed' => 'sometimes',
             'progress' => 'sometimes',
-            'priority' => 'required|in:' . implode(',', array_keys(Task::$priorities)),
+            'priority' => 'required|in:' . implode(',', array_values(Task::$priorities)),
         ]);
         if ($data->fails()) {
             return response()->json(['errors' => $data->errors()], 422);
@@ -102,7 +102,7 @@ class UserTaskController extends Controller
             'deadline' => 'required|date',
             'is_completed' => 'sometimes',
             'progress' => 'sometimes',
-            'priority' => 'required|in:' . implode(',', array_keys(Task::$priorities)),
+            'priority' => 'required|in:' . implode(',', array_values(Task::$priorities)),
         ]);
         if ($data->fails()) {
             return response()->json($data->errors(), 422);
