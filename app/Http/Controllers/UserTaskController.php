@@ -45,7 +45,7 @@ class UserTaskController extends Controller
             'priority' => 'required|in:' . implode(',', array_keys(Task::$priorities)),
         ]);
         if ($data->fails()) {
-            return response()->json(['message' => 'Validation failed'], 400);
+            return response()->json(['errors' => $data->errors()], 422);
         }
         $title = $request->title;
         $description = $request->description;
@@ -87,7 +87,11 @@ class UserTaskController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
-
+    protected $priorities = [
+        'normal' => 'Normal',
+        'important' => 'Important',
+        'very_important' => 'Very Important',
+    ];
 
     public function update(Request $request, string $id)
     {
@@ -97,7 +101,7 @@ class UserTaskController extends Controller
             'deadline' => 'required|date',
             'is_completed' => 'sometimes',
             'progress' => 'sometimes',
-            'priority' => 'required|in:' . implode(',', array_values(Task::$priorities)),
+            'priority' => 'required|in:' . implode(',', array_keys(Task::$priorities)),
         ]);
         if ($data->fails()) {
             return response()->json($data->errors(), 422);
@@ -189,7 +193,6 @@ class UserTaskController extends Controller
                 'series' => [$numberOfCompletedTasks, $numberOfIncompleteTasks],
                 'labels' => ['Completed Tasks', 'Incomplete Tasks']
             ]);
-
         } elseif ($statistics == 'task_distribution_by_progress') {
 
             $lessThan25percentProgress = $user->tasks()
@@ -233,8 +236,6 @@ class UserTaskController extends Controller
                     'Completed'
                 ]
             ]);
-
-
         } else if ($statistics == 'task_distribution_by_priority') {
             $response = [
                 'series' => [],
@@ -248,7 +249,6 @@ class UserTaskController extends Controller
             }
 
             return response()->json($response);
-
         }
     }
 
@@ -257,7 +257,6 @@ class UserTaskController extends Controller
         $notifications = auth()->user()->unreadNotifications;
 
         return Notification::collection($notifications);
-
     }
 
     public function makeNotificationsAsRead()
@@ -268,6 +267,4 @@ class UserTaskController extends Controller
             'success' => 'all unread notifications are marked as read'
         ]);
     }
-
-
 }

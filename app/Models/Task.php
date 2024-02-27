@@ -18,6 +18,7 @@ class Task extends Model
         'very_important' => 'Very Important',
     ];
 
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -28,7 +29,7 @@ class Task extends Model
         if (!$time)
             return $query;
         return $query->where(
-            fn(Builder $query) =>
+            fn (Builder $query) =>
             $query
                 ->where('created_at', '>=', $time)
                 ->orWhere('deadline', '>=', $time)
