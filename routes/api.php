@@ -32,8 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('tasks/{task}', [UserTaskController::class, 'show']);
         Route::put('tasks/{task}', [UserTaskController::class, 'update']);
         Route::delete('tasks/{task}', [UserTaskController::class, 'destroy']);
-
-        // filters routes are left 
+        //for efficiency
+        Route::get('efficiency', [UserTaskController::class, 'calculateOverallEfficiency']);
 
 
         // pie chart data routes 
