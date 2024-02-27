@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +33,27 @@ class AuthController extends Controller
         event(new Registered($user));
 
         return $user;
+    }
+
+    public function handleEmailVerificationRedirect(Request $request)
+    {
+        $id = $request->id;
+        $hash = $request->hash;
+        $user = User::findOrFail($id);
+
+        if (!hash_equals(sha1($user->getEmailForVerification()), (string) $hash)) {
+            throw new AuthorizationException();
+        }
+
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+
+            return redirect(env('FRONTEND_URL', 'http://localhost:5173') . '/login?message=Email verified successfully. Please login using your registered email address and password');
+
+        } else
+            return abort('email already verified');
+
+        // return redirect('/verify-email/' . $id . '/' . $hash);
     }
 
     public function login(Request $request)

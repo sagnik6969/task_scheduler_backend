@@ -24,7 +24,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 // user - authentication 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::get('/user', fn () => auth()->user());
+    Route::get('/user', fn() => auth()->user());
 
     Route::prefix('user')->group(function () {
         Route::get('tasks', [UserTaskController::class, 'index']);
@@ -66,7 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/email/verify', [UserController::class, 'verifyEmail'])->middleware('auth')->name('verification.notice');
-Route::get('/email/verify/{id}/{hash}', [UserController::class, 'handleEmailVerificationRedirect'])
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'handleEmailVerificationRedirect'])
     ->name('verification.verify');
 Route::post('/email/verification-notification', [UserController::class, 'sendEmailVerificationNotification'])->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
