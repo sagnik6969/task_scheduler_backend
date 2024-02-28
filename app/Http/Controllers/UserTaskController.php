@@ -4,11 +4,14 @@
 namespace App\Http\Controllers;
 
 
+use App\Http\Resources\Notification;
 use App\Http\Resources\TaskCollection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Http\Resources\Task as TaskResouces;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -20,52 +23,17 @@ class UserTaskController extends Controller
         //  user authentication
     }
 
-    public function index(Request $request)
-{
-    try {
-        $filter = $request->query('filter');
-        //these need to change according to the auth user
-        // $tasks = Task::where('user_id', 2)->get();
-        $tasksQuery = auth()->user()->tasks()->getQuery(); 
-// - /api/user/tasks?filter=""
-// - / -> /api/user/tasks
-// - / -> /filter=""
-        switch ($filter) { 
-            case 'most_important':
-                $tasksQuery->orderByRaw("
-                    CASE 
-                        WHEN priority = 'very important' THEN 1 
-                        WHEN priority = 'important' THEN 2 
-                        WHEN priority = 'normal' THEN 3 
-                        ELSE 4 
-                    END, updated_at DESC
-                ");
-                break; 
-            case 'recently_added':
-                $tasksQuery->orderBy('updated_at', 'desc');
-                break;
-            case 'near_deadline':
-                $tasksQuery->orderBy('deadline', 'desc');
-                break; 
-            case 'deadline_crossed':
-                $tasksQuery->where('is_completed', 0)->where('deadline', '<', now());
-                break;   
-            default:
-                $tasksQuery->orderBy('deadline', 'desc');
-                break;
+    public function index()
+    {
+        try {
+            //these need to change according to the auth user
+            // $tasks = Task::where('user_id', 2)->get();
+            $tasks = auth()->user()->tasks;
+            return new TaskCollection($tasks, 'index');
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
- 
-        $tasks = $tasksQuery->get();
-        if ($tasks->isEmpty()) {
-            return response()->json(['message' => 'No tasks found for this user'], 404);
-        }
-
-        return new TaskCollection($tasks, 'index');
-    } catch (\Exception $e) {
-        return response()->json(['message' => $e->getMessage()], 500);
     }
-}
-
 
     public function store(Request $request)
     {
@@ -75,10 +43,10 @@ class UserTaskController extends Controller
             'deadline' => 'required|date',
             'is_completed' => 'sometimes',
             'progress' => 'sometimes',
-            'priority' => 'required|in:' . implode(',', array_keys(Task::$priorities)),
+            'priority' => 'required|in:' . implode(',', array_values(Task::$priorities)),
         ]);
         if ($data->fails()) {
-            return response()->json(['message' => 'Validation failed'], 400);
+            return response()->json(['errors' => $data->errors()], 422);
         }
         $title = $request->title;
         $description = $request->description;
@@ -120,7 +88,11 @@ class UserTaskController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
-
+    protected $priorities = [
+        'normal' => 'Normal',
+        'important' => 'Important',
+        'very_important' => 'Very Important',
+    ];
 
     public function update(Request $request, string $id)
     {
@@ -130,10 +102,11 @@ class UserTaskController extends Controller
             'deadline' => 'required|date',
             'is_completed' => 'sometimes',
             'progress' => 'sometimes',
-            'priority' => 'required|in:' . implode(',', array_keys(Task::$priorities)),
+            'priority' => 'required|in:' . implode(',', array_values(Task::$priorities)),
         ]);
-        if ($data->fails()) {
-            return response()->json(['message' => 'Validation failed'], 400);
+        if ($data->fails()) { 
+            return response()->json($data->errors(), 422);
+            // return response()->json(['message' => 'Validation failed'], 400);
         }
         $title = $request->title;
         $description = $request->description;
@@ -193,20 +166,150 @@ class UserTaskController extends Controller
     {
         $user = Auth::user();
 
-        $incompleteTasks = $user->tasks()
-            ->where('is_completed', false)
-            ->orderByDesc('updated_at')
-            ->get();
+        $timeRange = request()->time_range;
+        $statistics = request()->statistics;
 
-        $completeTasks = $user->tasks()
-            ->where('is_completed', true)
-            ->orderByDesc('updated_at')
-            ->get();
+        $getTime = [
+            'last_hour' => [now()->subHour(), now()],
+            'today' => [now()->subDay(), now()],
+            'past_weak' => [now()->subWeek(), now()],
+            'past_month' => [now()->subMonth(), now()],
+            'past_year' => [now()->subYear(), now()],
+            'all' => [null, null]
+        ];
 
-        
+        if ($statistics == 'completed_vs_pending_tasks') {
+            $numberOfCompletedTasks = $user
+                ->tasks()
+                ->where('is_completed', 1)
+                ->timeFilter($getTime[$timeRange][0])
+                ->count();
+
+            $numberOfIncompleteTasks = $user->tasks()
+                ->where('is_completed', 0)
+                ->timeFilter($getTime[$timeRange][0])
+                ->count();
+
+            return response()->json([
+                'series' => [$numberOfCompletedTasks, $numberOfIncompleteTasks],
+                'labels' => ['Completed Tasks', 'Incomplete Tasks']
+            ]);
+        } elseif ($statistics == 'task_distribution_by_progress') {
+
+            $lessThan25percentProgress = $user->tasks()
+                ->where('progress', '<', 25)
+                ->timeFilter($getTime[$timeRange][0])
+                ->count();
+
+            $from25to50percentProgress = $user->tasks()
+                ->whereBetween('progress', [25, 50])
+                ->timeFilter($getTime[$timeRange][0])
+                ->count();
+
+            $from51to75percentProgress = $user->tasks()
+                ->whereBetween('progress', [51, 75])
+                ->timeFilter($getTime[$timeRange][0])
+                ->count();
+
+            $moreThan75percentProgress = $user->tasks()
+                ->whereBetween('progress', [75, 99])
+                ->timeFilter($getTime[$timeRange][0])
+                ->count();
+
+            $noOfCompletedTasks = $user->tasks()
+                ->where('is_completed', 1)
+                ->timeFilter($getTime[$timeRange][0])
+                ->count();
+
+            return response()->json([
+                'series' => [
+                    $lessThan25percentProgress,
+                    $from25to50percentProgress,
+                    $from51to75percentProgress,
+                    $moreThan75percentProgress,
+                    $noOfCompletedTasks
+                ],
+                'labels' => [
+                    'Less than 25%',
+                    'From 25% to 50%',
+                    'From 51% to 75%',
+                    'More than 75%',
+                    'Completed'
+                ]
+            ]);
+        } else if ($statistics == 'task_distribution_by_priority') {
+            $response = [
+                'series' => [],
+                'labels' => []
+            ];
+            foreach (Task::$priorities as $priority) {
+                $response['series'][] = Task::where('priority', $priority)
+                    ->timeFilter($getTime[$timeRange][0])
+                    ->count();
+                $response['labels'][] = $priority;
+            }
+
+            return response()->json($response);
+        }
+    }
+
+    public function getNotifications()
+    {
+        $notifications = auth()->user()->unreadNotifications;
+
+        return Notification::collection($notifications);
+    }
+
+    public function makeNotificationsAsRead()
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+
         return response()->json([
-            'incomplete' => $incompleteTasks,
-            'complete' => $completeTasks,
+            'success' => 'all unread notifications are marked as read'
+        ]);
+    }
+    public function calculateOverallEfficiency()
+    {
+        $user = auth()->user();
+        $completedTasks = $user->tasks()->where('is_completed', 1)->get();
+        $totalEfficiency = 0;
+        $totalTasks = $completedTasks->count();
+
+        foreach ($completedTasks as $task) {
+            $createdAt = Carbon::parse($task->created_at);
+            $updatedAt = Carbon::parse($task->updated_at);
+
+            $differenceInHours = $createdAt->diffInHours($updatedAt);
+
+            if ($differenceInHours <= 24) {
+                $efficiencyRating = 5;
+            } elseif ($differenceInHours <= 48) {
+                $efficiencyRating = 4;
+            } elseif ($differenceInHours <= 72) {
+                $efficiencyRating = 3;
+            } else {
+                $efficiencyRating = 2;
+            }
+
+            $totalEfficiency += $efficiencyRating;
+        }
+
+        $averageEfficiency = $totalTasks > 0 ? $totalEfficiency / $totalTasks : 0;
+
+        if ($averageEfficiency >= 4.5) {
+            $overallEfficiencyRating = 'Excellent';
+        } elseif ($averageEfficiency >= 3.5) {
+            $overallEfficiencyRating = 'Good';
+        } elseif ($averageEfficiency >= 2.5) {
+            $overallEfficiencyRating = 'Average';
+        } else {
+            $overallEfficiencyRating = 'Needs Improvement';
+        }
+
+        return response()->json([
+            'total_tasks' => $totalTasks,
+            'average_efficiency' => $averageEfficiency,
+            'overall_efficiency_rating' => $overallEfficiencyRating
         ]);
     }
 }

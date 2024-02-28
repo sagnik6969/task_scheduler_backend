@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -10,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
     /**
@@ -50,9 +52,9 @@ class User extends Authenticatable
         return $this->hasMany(Task::class);
     }
 
-    public function adminassignedtasks(): HasOne
+    public function adminassigntasks(): HasOne
     {
-        return $this->hasOne(AdminAssignedTask::class);
+        return $this->hasOne(AdminAssignTask::class);
     }
 
     // no need of this i have adjusted our all  requirements so ignore this 
