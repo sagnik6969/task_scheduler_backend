@@ -104,7 +104,7 @@ class UserTaskController extends Controller
             'progress' => 'sometimes',
             'priority' => 'required|in:' . implode(',', array_values(Task::$priorities)),
         ]);
-        if ($data->fails()) { 
+        if ($data->fails()) {
             return response()->json($data->errors(), 422);
             // return response()->json(['message' => 'Validation failed'], 400);
         }
@@ -209,21 +209,25 @@ class UserTaskController extends Controller
 
             $lessThan25percentProgress = $user->tasks()
                 ->where('progress', '<', 25)
+                ->where('is_completed', 0)
                 ->timeFilter($getTime[$timeRange][0])
                 ->count();
 
             $from25to50percentProgress = $user->tasks()
                 ->whereBetween('progress', [25, 50])
+                ->where('is_completed', 0)
                 ->timeFilter($getTime[$timeRange][0])
                 ->count();
 
             $from51to75percentProgress = $user->tasks()
                 ->whereBetween('progress', [51, 75])
+                ->where('is_completed', 0)
                 ->timeFilter($getTime[$timeRange][0])
                 ->count();
 
             $moreThan75percentProgress = $user->tasks()
                 ->whereBetween('progress', [75, 99])
+                ->where('is_completed', 0)
                 ->timeFilter($getTime[$timeRange][0])
                 ->count();
 
@@ -253,8 +257,8 @@ class UserTaskController extends Controller
                 'series' => [],
                 'labels' => []
             ];
-            foreach (Task::$priorities as $priority) {
-                $response['series'][] = Task::where('priority', $priority)
+            foreach (array_values(Task::$priorities) as $priority) {
+                $response['series'][] = $user->tasks()->where('priority', $priority)
                     ->timeFilter($getTime[$timeRange][0])
                     ->count();
                 $response['labels'][] = $priority;
