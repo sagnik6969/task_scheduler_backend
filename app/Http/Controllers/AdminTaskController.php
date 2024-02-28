@@ -6,6 +6,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdminAssignedTask;
+use App\Models\AdminAssignTask;
 use App\Notifications\TaskAssginmentNotification;
 use Illuminate\Http\Request;
 use App\Models\Task;
@@ -83,26 +84,34 @@ class AdminTaskController extends Controller
             'title' => 'required|min:10',
             'description' => 'sometimes',
             'deadline' => 'required|date',
+            'is_completed' => 'sometimes',
+            'progress' => 'sometimes',
+            'priority' =>  'required|in:' . implode(',', array_values(Task::$priorities))
         ]);
 
         if ($task->fails()) {
             return response()->json(['errors' => $task->errors()], 400);
         }
 
-        $task = new AdminAssignedTask();
+        $task = new AdminAssignTask();
         $task->title = $request->title;
         $task->description = $request->description;
         $task->deadline = \Carbon\Carbon::parse($request->deadline);
+        // $task->deadline = $request->deadline;
         $task->admin_id = auth()->user()->id;
         $task->user_id = $user->id;
+        $task->priority = $request->priority;
+        $task->save();
+        
+        
         $token = Str::random(60);
         $user->notify(new TaskAssginmentNotification($task, $token));
 
         // here may be we need to make another migration specially for task assigned by admin which will help to create section
         // of task status as like user accepted or not and other creativity so no need to save it will be user if user accept it then it will be save
         // and automatic admin can see in his dashboard for that refer TaskAssignmentController.php 
-        $task->save();
-        return response()->json(['message' => 'Task assigned successfully']);
+        // $task->save();
+        return response()->json(['message' => `Task Detailes are sent successfully to {$user->name}`]);
     }
 
     public function allUSerAnalysys()
@@ -132,12 +141,12 @@ class AdminTaskController extends Controller
     {
 
         $authUser = Auth::user();
-        // if (!$authUser || !$authUser->is_admin) {
-        //     return response()->json(['error' => 'Unauthorized'], 401);
-        // }
+        if (!$authUser || !$authUser->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
 
         if ($user->is_admin) {
-            return response()->json(['error' => 'The provided user is already an admin'], 401);
+            return response()->json(['message' => 'The provided user is already an admin'], 401);
         }
 
         $user->is_admin = 1;
@@ -165,6 +174,7 @@ class AdminTaskController extends Controller
         ]);
     }
 
+    
     // public function deleteUser(User $user)
     // {
     //     $user->delete();

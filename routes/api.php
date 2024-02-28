@@ -37,10 +37,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
         // pie chart data routes 
-        Route::get('analysis', [UserTaskController::class, 'userTasksAnalysis']); // checked 
+        Route::get('analysis', [UserTaskController::class, 'userTasksAnalysis']); // checked '
         Route::get('notifications', [UserTaskController::class, 'getNotifications']);
         Route::post('notifications/mark_as_read', [UserTaskController::class, 'makeNotificationsAsRead']);
-    });
+    }); 
 
     Route::prefix('admin')->group(function () {
         Route::get('tasks', [AdminTaskController::class, 'index']); //checked
@@ -58,7 +58,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('analysis/{user}', [AdminTaskController::class, 'userTaskAnalysis']); //checked
     });
 
-    Route::get('/tasks/assign/{taskId}/{token}', [TaskAssignmentController::class, 'assignTask']); // part of assignTaskToUser
+    Route::get('/tasks/assign/{taskId}/{token}', [TaskAssignmentController::class, 'assignTask'])->where('token', '.*'); // part of assignTaskToUser
+    Route::patch('/tasks/assign/{taskId}', [TaskAssignmentController::class, 'assignTaskUpdates']); 
 });
 
 
