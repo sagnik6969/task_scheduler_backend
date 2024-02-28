@@ -56,7 +56,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('analysis/{user}', [AdminTaskController::class, 'userTaskAnalysis']);//checked
     });
 
-    Route::get('/tasks/assign/{taskId}/{token}', [TaskAssignmentController::class, 'assignTask']); // part of assignTaskToUser
+    Route::get('/tasks/assign/{taskId}/{token}', [TaskAssignmentController::class, 'assignTask'])->where('token', '.*'); // part of assignTaskToUser
+    Route::patch('/tasks/assign/{taskId}', [TaskAssignmentController::class, 'assignTaskUpdates']); 
 });
 
 
