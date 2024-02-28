@@ -133,6 +133,9 @@ class AdminTaskController extends Controller
 
         return response()->json($usersData);
     }
+    public function taskAcceptance(User $user, Task $task)
+    {
+    }
 
     public function makeAdmin(User $user)
     {

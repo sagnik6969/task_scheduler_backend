@@ -29,7 +29,7 @@ class TaskDeadlineReminderNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**
@@ -43,7 +43,7 @@ class TaskDeadlineReminderNotification extends Notification
             ->line('We wanted to remind you that you have a task with a deadline approaching in just one hour.')
             ->line('Here are the details:')
             ->line('Task Name: ' . $this->task->title)
-            ->line('Deadline: ' . $this->task->deadline->format('Y-m-d H:i:s'))
+            ->line('Deadline: ' . $this->task->deadline)
             ->line('Please make sure to complete the task within the next hour to stay on track.')
             ->line("Thank you for using " . env('app.name') . " app!");
     }
@@ -56,7 +56,8 @@ class TaskDeadlineReminderNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'type' => 'deadline_reminder',
+            'text' => $this->task->title . " is due in 1 hour! don't forget to complete it"
         ];
     }
 }
