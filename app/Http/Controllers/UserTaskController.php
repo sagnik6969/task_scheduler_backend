@@ -98,7 +98,7 @@ class UserTaskController extends Controller
             'progress' => 'sometimes',
             'priority' => 'required|in:' . implode(',', array_values(Task::$priorities)),
         ]);
-        if ($data->fails()) {
+        if ($data->fails()) { 
             return response()->json($data->errors(), 422);
             // return response()->json(['message' => 'Validation failed'], 400);
         }
