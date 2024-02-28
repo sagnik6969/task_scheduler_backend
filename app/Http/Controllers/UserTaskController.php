@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Http\Resources\Task as TaskResouces;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -103,7 +104,7 @@ class UserTaskController extends Controller
             'progress' => 'sometimes',
             'priority' => 'required|in:' . implode(',', array_values(Task::$priorities)),
         ]);
-        if ($data->fails()) {
+        if ($data->fails()) { 
             return response()->json($data->errors(), 422);
             // return response()->json(['message' => 'Validation failed'], 400);
         }
@@ -276,6 +277,50 @@ class UserTaskController extends Controller
 
         return response()->json([
             'success' => 'all unread notifications are marked as read'
+        ]);
+    }
+    public function calculateOverallEfficiency()
+    {
+        $user = auth()->user();
+        $completedTasks = $user->tasks()->where('is_completed', 1)->get();
+        $totalEfficiency = 0;
+        $totalTasks = $completedTasks->count();
+
+        foreach ($completedTasks as $task) {
+            $createdAt = Carbon::parse($task->created_at);
+            $updatedAt = Carbon::parse($task->updated_at);
+
+            $differenceInHours = $createdAt->diffInHours($updatedAt);
+
+            if ($differenceInHours <= 24) {
+                $efficiencyRating = 5;
+            } elseif ($differenceInHours <= 48) {
+                $efficiencyRating = 4;
+            } elseif ($differenceInHours <= 72) {
+                $efficiencyRating = 3;
+            } else {
+                $efficiencyRating = 2;
+            }
+
+            $totalEfficiency += $efficiencyRating;
+        }
+
+        $averageEfficiency = $totalTasks > 0 ? $totalEfficiency / $totalTasks : 0;
+
+        if ($averageEfficiency >= 4.5) {
+            $overallEfficiencyRating = 'Excellent';
+        } elseif ($averageEfficiency >= 3.5) {
+            $overallEfficiencyRating = 'Good';
+        } elseif ($averageEfficiency >= 2.5) {
+            $overallEfficiencyRating = 'Average';
+        } else {
+            $overallEfficiencyRating = 'Needs Improvement';
+        }
+
+        return response()->json([
+            'total_tasks' => $totalTasks,
+            'average_efficiency' => $averageEfficiency,
+            'overall_efficiency_rating' => $overallEfficiencyRating
         ]);
     }
 }

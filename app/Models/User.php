@@ -52,9 +52,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Task::class);
     }
 
-    public function adminassignedtasks(): HasOne
+    public function adminassigntasks(): HasOne
     {
-        return $this->hasOne(AdminAssignedTask::class);
+        return $this->hasOne(AdminAssignTask::class);
     }
 
     // no need of this i have adjusted our all  requirements so ignore this 
