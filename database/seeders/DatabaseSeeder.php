@@ -14,29 +14,33 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::factory()->count(5)->create();
+        $users = User::factory()->count(5)->create()->each(fn($user) => Task::factory(10)->create([
+            'user_id' => $user->id
+        ]));
 
 
-        // Create 10 tasks associated with 5 users randomly
-        Task::factory(10)->create([
-            'user_id' => 1,
-            'created_at' => now()
-        ]);
-        Task::factory(10)->create([
-            'user_id' => 1,
-            'created_at' => now()->subHour()
-        ]);
-        Task::factory(10)->create([
-            'user_id' => 1,
-            'created_at' => now()->subDay()
-        ]);
-        Task::factory(10)->create([
-            'user_id' => 1,
-            'created_at' => now()->subMonth()
-        ]);
-        Task::factory(10)->create([
-            'user_id' => 1,
-            'created_at' => now()->subMonths(10)
-        ]);
+
+
+        // // Create 10 tasks associated with 5 users randomly
+        // Task::factory(10)->create([
+        //     'user_id' => 1,
+        //     'created_at' => now()
+        // ]);
+        // Task::factory(10)->create([
+        //     'user_id' => 1,
+        //     'created_at' => now()->subHour()
+        // ]);
+        // Task::factory(10)->create([
+        //     'user_id' => 1,
+        //     'created_at' => now()->subDay()
+        // ]);
+        // Task::factory(10)->create([
+        //     'user_id' => 1,
+        //     'created_at' => now()->subMonth()
+        // ]);
+        // Task::factory(10)->create([
+        //     'user_id' => 1,
+        //     'created_at' => now()->subMonths(10)
+        // ]);
     }
 }

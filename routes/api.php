@@ -24,7 +24,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 // user - authentication 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::get('/user', fn () => auth()->user());
+    Route::get('/user', fn() => auth()->user());
 
     Route::prefix('user')->group(function () {
         Route::get('tasks', [UserTaskController::class, 'index']);
@@ -55,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // pie chart data routes
         Route::get('analysis', [AdminTaskController::class, 'allUSerAnalysys']); // checked
+        Route::get('analysis/all_user_task_progress_analysis', [AdminTaskController::class, 'allUserTaskProgressAnalysis']);
         Route::get('analysis/{user}', [AdminTaskController::class, 'userTaskAnalysis']); //checked
     });
 
