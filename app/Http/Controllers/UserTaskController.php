@@ -165,6 +165,17 @@ class UserTaskController extends Controller
     {
         $user = Auth::user();
 
+        if (request()->query('admin')) {
+            if (!auth()->user()->is_admin) {
+                response()->json(['error' => 'Unauthorized'], 401);
+            } elseif (!request()->query('user_id')) {
+                response()->json(['error' => 'User not provided'], 400);
+            } else
+                $user = User::findOrFail(request()->query('user_id'));
+
+        }
+
+
         $timeRange = request()->time_range;
         $statistics = request()->statistics;
 

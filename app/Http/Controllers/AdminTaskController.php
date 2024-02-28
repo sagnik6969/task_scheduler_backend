@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AdminAssignedTask;
 use App\Notifications\TaskAssginmentNotification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Models\User;
@@ -27,7 +28,13 @@ class AdminTaskController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
-            $users = User::where('is_admin', 0)->with('tasks')->get();
+            $users = User::where('is_admin', 0)
+                ->with('tasks')
+                ->withCount([
+                    'tasks as completed_tasks' => fn(Builder $query) => $query->where('is_completed', 1),
+                    'tasks as incomplete_tasks' => fn(Builder $query) => $query->where('is_completed', 0)
+                ])
+                ->get();
 
             return response()->json(['users' => $users]);
         } catch (\Exception $e) {
@@ -163,6 +170,72 @@ class AdminTaskController extends Controller
             'incomplete' => $incompleteTasks,
             'complete' => $completeTasks,
         ]);
+    }
+
+
+    public function allUserTaskProgressAnalysis()
+    {
+        $authUser = request()->user();
+        if (!$authUser->is_admin) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+
+        }
+
+        $response = [
+            'series' => [],
+            'labels' => []
+        ];
+
+        for ($i = 0; $i < 90; $i += 10) {
+            $start = $i == 0 ? $i : $i + 1;
+            $end = $i + 10;
+            $response['labels'][] = "From {$start}% to {$end}%";
+            $response['series'][] = Task::whereBetween('progress', [$start, $end])
+                ->count();
+
+        }
+
+        $response['labels'][] = 'Completed';
+        $response['series'][] = Task::where('is_completed', 1)
+            ->count();
+
+        return response()->json($response);
+
+        // $lessThan25percentProgress =
+        //     Task::where('progress', '<', 25)
+        //         ->count();
+
+        // $from25to50percentProgress =
+        //     Task::whereBetween('progress', [25, 50])
+        //         ->count();
+
+        // $from51to75percentProgress = Task::whereBetween('progress', [51, 75])
+        //     ->count();
+
+        // $moreThan75percentProgress = Task::whereBetween('progress', [75, 99])
+        //     ->count();
+
+        // $noOfCompletedTasks =
+        //     Task::where('is_completed', 1)
+        //         ->count();
+
+        // return response()->json([
+        //     'series' => [
+        //         $lessThan25percentProgress,
+        //         $from25to50percentProgress,
+        //         $from51to75percentProgress,
+        //         $moreThan75percentProgress,
+        //         $noOfCompletedTasks
+        //     ],
+        //     'labels' => [
+        //         'Less than 25%',
+        //         'From 25% to 50%',
+        //         'From 51% to 75%',
+        //         'More than 75%',
+        //         'Completed'
+        //     ]
+        // ]);
+
     }
 
     // public function deleteUser(User $user)
