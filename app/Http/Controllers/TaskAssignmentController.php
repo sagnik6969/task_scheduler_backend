@@ -15,8 +15,14 @@ class TaskAssignmentController extends Controller
         $user = Auth::user();
 
         $verifyTask = AdminAssignTask::findOrFail($taskId);
-
-        if($verifyTask->deadline > now()){
+        
+        if($user->id !== $verifyTask->user_id){
+            return response()->json([
+                'error' => 'Not Authorized',
+                'link' => '/'
+            ]);
+        }
+        if($verifyTask->deadline <= now()){
             return response()->json([
                 'error' => 'Task has already passed deadline',
                 'link' => '/'
@@ -48,9 +54,10 @@ class TaskAssignmentController extends Controller
 
         $task = AdminAssignTask::findOrFail($taskId);
 
+        // if($user->id)
 
-        if($task->deadline > now()){
-            return response()->json([
+        if($task->deadline <= now()){
+            return response()->json([ 
                 'error' => 'Task has already passed deadline',
                 'link' => '/'
             ]);
@@ -74,7 +81,7 @@ class TaskAssignmentController extends Controller
             'progress' => 0,
             'priority' => $task->priority,
             'user_id' => $user->id,
-            'admin_id' => $task->admin_id,
+            // 'admin_id' => $task->admin_id,
         ]);
 
         $user->tasks()->attach($attachTask);

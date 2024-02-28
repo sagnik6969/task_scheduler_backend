@@ -86,7 +86,7 @@ class AdminTaskController extends Controller
             'deadline' => 'required|date',
             'is_completed' => 'sometimes',
             'progress' => 'sometimes',
-            'priority' => 'required'
+            'priority' =>  'required|in:' . implode(',', array_values(Task::$priorities))
         ]);
 
         if ($task->fails()) {
@@ -96,8 +96,8 @@ class AdminTaskController extends Controller
         $task = new AdminAssignTask();
         $task->title = $request->title;
         $task->description = $request->description;
-        // $task->deadline = \Carbon\Carbon::parse($request->deadline);
-        $task->deadline = $request->deadline;
+        $task->deadline = \Carbon\Carbon::parse($request->deadline);
+        // $task->deadline = $request->deadline;
         $task->admin_id = auth()->user()->id;
         $task->user_id = $user->id;
         $task->priority = $request->priority;

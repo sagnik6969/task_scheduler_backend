@@ -41,19 +41,18 @@ class TaskAssginmentNotification extends Notification
     {
         if ($this->token != null)
             // currectly its a local link but change it in future
-            $url = url(`http://localhost:5173/api/tasks/assign/{$this->task->id}/{$this->token}`);
-            var_dump($url);
+            $url = url("http://localhost:5173/tasks/assign/{$this->task->id}/{$this->token}");
         return (new MailMessage)
             ->subject('New Task Assigned')
             ->greeting("Dear {$notifiable->name},")
             ->line("You have a new task assigned by the admin.")
             ->line('Here are the details:')
             ->line('Task Name: ' . $this->task->title)
-            ->line('Deadline: ' . $this->task->deadline) 
+            // ->line('Deadline: ' . $this->task->deadline) 
+            ->line('Deadline: ' . $this->task->deadline->format('Y-m-d H:i:s'))
             ->line('Please log in to your account to view and manage this task.')
             ->action('Accept Task', $url)
             ->line("Thank you for using " . config('app.name') . " app!");
-            // ->line('Deadline: ' . $this->task->deadline->format('Y-m-d H:i:s'))
     }
 
     /**
