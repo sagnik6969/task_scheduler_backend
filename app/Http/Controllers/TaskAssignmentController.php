@@ -14,6 +14,13 @@ class TaskAssignmentController extends Controller
         
         $user = Auth::user();
 
+        if($user===null){
+            return response()->json([
+                'error' => 'Not Logged In',
+                'link' => '/login'
+            ]);
+        }
+
         $verifyTask = AdminAssignTask::findOrFail($taskId);
         
         if($user->id !== $verifyTask->user_id){
@@ -50,8 +57,14 @@ class TaskAssignmentController extends Controller
     {
         $user = Auth::user();
 
-        $status = $request->input('status');
+        if($user===null){
+            return response()->json([
+                'error' => 'Not Logged In',
+                'link' => '/login'
+            ]);
+        }
 
+        $status = $request->input('status');
         $task = AdminAssignTask::findOrFail($taskId);
 
         // if($user->id)
@@ -65,27 +78,48 @@ class TaskAssignmentController extends Controller
 
         else if($task->status !== 'Pending'){
             return response()->json([
-                'error' => $task->status==='Accepted'? 'Task Status Is Already Accepted' : 'Task Status Is Already Cancelled',
+                'error' => $task->status==='accept'? 'Task Status Is Already Accepted' : 'Task Status Is Already Cancelled',
                 'link' => '/'
             ]);
         }
 
-        $task->status = $status;
-        $task->save();
+        if($status=='Decline'){
+            $task->status = $status;
+            $task->save();
+            return response()->json(['message' => 'Task Assigned By Admin Is Declined successfully'], 200);
+        }else{
+            $attachTask = Task::create([
+                'title' => $task->title,
+                'description' => $task->description, 
+                'deadline' => $task->deadline,
+                'is_completed' => 0,
+                'progress' => 0,
+                'priority' => $task->priority,
+                'user_id' => $user->id,
+                'admin_id' => $task->admin_id,
+            ]);
+            
+    
+            $task->status = $status;
+            $task->task_id = $attachTask->id;
+            $task->save();
+    
+            return response()->json(['message' => 'Congratulations!! . Task added successfully'], 200);
+        }
+    }
 
-        $attachTask = Task::create([
-            'title' => $task->title,
-            'description' => $task->description,
-            'deadline' => $task->deadline,
-            'is_completed' => 0,
-            'progress' => 0,
-            'priority' => $task->priority,
-            'user_id' => $user->id,
-            // 'admin_id' => $task->admin_id,
-        ]);
-
-        $user->tasks()->attach($attachTask);
-
-        return response()->json(['message' => 'Congratulations!! . Task added successfully'], 200);
+    public function allAssignTasks(){
+        try {
+            $authUser = Auth::user();
+            if (!$authUser || !$authUser->is_admin) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+            $assignTasks = AdminAssignTask::with(['user', 'task'])
+                                ->where('admin_id', $authUser->id)
+                                ->orderBy('updated_at', 'desc')->get();
+    return response()->json($assignTasks);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e], 500);
+        }
     }
 }

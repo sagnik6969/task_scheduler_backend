@@ -70,6 +70,7 @@ class AdminTaskController extends Controller
             if (!$authUser || !$authUser->is_admin) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
+            $task->adminassigntasks()->delete();
             $task->delete();
             return response()->json(['message' => 'Task deleted successfully']);
         } catch (\Exception $e) {
