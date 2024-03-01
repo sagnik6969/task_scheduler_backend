@@ -9,7 +9,7 @@ use App\Http\Resources\TaskCollection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Models\Task;
-use App\Http\Resources\Task as TaskResouces;
+use App\Http\Resources\Task as TaskResource;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -18,20 +18,18 @@ use Illuminate\Support\Facades\Validator;
 class UserTaskController extends Controller
 {
 
-    public function __construct()
-    {
-        //  user authentication
-    }
 
     public function index()
     {
         try {
-            //these need to change according to the auth user
-            // $tasks = Task::where('user_id', 2)->get();
-            $tasks = auth()->user()->tasks;
+            $tasks = auth()
+                ->user()
+                ->tasks()
+                ->latest()
+                ->get();
             return new TaskCollection($tasks, 'index');
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => 'internal server error'], 500);
         }
     }
 
@@ -48,26 +46,15 @@ class UserTaskController extends Controller
         if ($data->fails()) {
             return response()->json(['errors' => $data->errors()], 422);
         }
-        $title = $request->title;
-        $description = $request->description;
-        $deadline = $request->deadline;
-        $is_completed = $request->is_completed ?? false;
-        $progress = $request->progress ?? 0;
-        $priority = $request->priority;
-        $user_id = auth()->user()->id;
+
         try {
-            $task = Task::create([
-                'title' => $title,
-                'description' => $description,
-                'deadline' => $deadline,
-                'is_completed' => $is_completed,
-                'progress' => $progress,
-                'priority' => $priority,
-                'user_id' => $user_id
-            ]);
-            return new TaskResouces($task, 'create');
+            $task = auth()->user()->tasks()->create($data->getData());
+            $task = $task->refresh();
+            // the above line is needed because database default values are not reflected in models
+            // https://stackoverflow.com/questions/58954637/laravel-model-not-returning-properties-with-default-value-after-creation
+            return new TaskResource($task, 'create');
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Internal server error'], 500);
         }
     }
 
@@ -78,79 +65,50 @@ class UserTaskController extends Controller
     public function show(string $id)
     {
         try {
-            $task = Task::findOrfail($id);
-            if ($task) {
-                return new TaskResouces($task, 'show');
-            } else {
-                return response()->json(['message' => 'Task not found'], 404);
-            }
+            $task = Task::findOrFail($id);
+            return new TaskResource($task, 'show');
+
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => 'task not found'], 404);
         }
     }
-    protected $priorities = [
-        'normal' => 'Normal',
-        'important' => 'Important',
-        'very_important' => 'Very Important',
-    ];
+
 
     public function update(Request $request, string $id)
     {
-        $data = Validator::make($request->all(), [
-            'title' => 'required',
-            'description' => 'sometimes',
-            'deadline' => 'required|date',
-            'is_completed' => 'sometimes',
-            'progress' => 'sometimes',
-            'priority' => 'required|in:' . implode(',', array_values(Task::$priorities)),
-        ]);
-        if ($data->fails()) {
-            return response()->json($data->errors(), 422);
-            // return response()->json(['message' => 'Validation failed'], 400);
-        }
-        $title = $request->title;
-        $description = $request->description;
-        $deadline = $request->deadline;
-        $is_completed = $request->is_completed ?? false;
-        $progress = $request->progress ?? 0;
-        $priority = $request->priority;
         try {
-            $task = Task::findOrfail($id);
-            if ($task) {
-                $task->update([
-                    'title' => $title,
-                    'description' => $description,
-                    'deadline' => $deadline,
-                    'is_completed' => $is_completed,
-                    'progress' => $progress,
-                    'priority' => $priority,
-                ]);
-                return new TaskResouces($task, 'update');
-            } else {
-                return response()->json(['message' => 'Task not found'], 404);
+
+            $task = Task::find($id);
+
+            if (!$task)
+                return response()->json(['message' => 'task not found'], 404);
+
+            $data = Validator::make($request->all(), [
+                'title' => 'sometimes',
+                'description' => 'sometimes',
+                'deadline' => 'sometimes|date',
+                'is_completed' => 'sometimes',
+                'progress' => 'sometimes',
+                'priority' => 'sometimes|in:' . implode(',', array_values(Task::$priorities)),
+            ]);
+            if ($data->fails()) {
+                return response()->json($data->errors(), 422);
             }
+
+            $task->update($data->getData());
+            return new TaskResource($task, 'update');
+
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => 'internal server error']);
         }
-    }
-    public function edit(string $id)
-    {
-        try {
-            $task = Task::findOrfail($id);
-            if ($task) {
-                return new TaskResouces($task, 'edit');
-            } else {
-                return response()->json(['message' => 'Task not found'], 404);
-            }
-        } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+
     }
 
     public function destroy(string $id)
     {
         try {
-            $task = Task::findOrfail($id);
+
+            $task = Task::find($id);
             if ($task) {
                 $task->delete();
                 return response()->json(['message' => 'Task deleted'], 200);
@@ -158,7 +116,7 @@ class UserTaskController extends Controller
                 return response()->json(['message' => 'Task not found'], 404);
             }
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => 'internal server error'], 500);
         }
     }
 
