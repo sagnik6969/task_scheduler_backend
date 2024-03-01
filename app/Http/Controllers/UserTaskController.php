@@ -48,7 +48,7 @@ class UserTaskController extends Controller
         }
 
         try {
-            $task = auth()->user()->tasks()->create($data->getData());
+            $task = auth()->user()->tasks()->create($data->validated());
             $task = $task->refresh();
             // the above line is needed because database default values are not reflected in models
             // https://stackoverflow.com/questions/58954637/laravel-model-not-returning-properties-with-default-value-after-creation
@@ -95,7 +95,8 @@ class UserTaskController extends Controller
                 return response()->json($data->errors(), 422);
             }
 
-            $task->update($data->getData());
+            $task->update($data->validated());
+            $task->refresh();
             return new TaskResource($task, 'update');
 
         } catch (\Exception $e) {
