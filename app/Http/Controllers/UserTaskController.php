@@ -146,7 +146,7 @@ class UserTaskController extends Controller
             $task = Task::findOrfail($id);
             if ($task) {
                 $task->delete();
-                return response()->json(['message' => 'Task deleted'], 200);
+                return response()->json(['message' => 'Task deleted'], 204);
             } else {
                 return response()->json(['message' => 'Task not found'], 404);
             }
@@ -187,7 +187,6 @@ class UserTaskController extends Controller
                 'series' => [$numberOfCompletedTasks, $numberOfIncompleteTasks],
                 'labels' => ['Completed Tasks', 'Incomplete Tasks']
             ]);
-
         } elseif ($statistics == 'task_distribution_by_progress') {
 
             $lessThan25percentProgress = $user->tasks()
@@ -231,8 +230,6 @@ class UserTaskController extends Controller
                     'Completed'
                 ]
             ]);
-
-
         } else if ($statistics == 'task_distribution_by_priority') {
             $response = [
                 'series' => [],
@@ -246,7 +243,6 @@ class UserTaskController extends Controller
             }
 
             return response()->json($response);
-
         }
 
 
