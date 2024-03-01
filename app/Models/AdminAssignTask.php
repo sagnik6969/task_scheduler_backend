@@ -14,4 +14,9 @@ class AdminAssignTask extends Model
     {
         return $this->belongsTo(User::class);
     }   
+
+    public function task():BelongsTo
+    {
+        return $this->belongsTo(Task::class);
+    }   
 }

@@ -57,12 +57,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('analysis', [AdminTaskController::class, 'allUSerAnalysys']); // checked
         Route::get('analysis/all_user_task_progress_analysis', [AdminTaskController::class, 'allUserTaskProgressAnalysis']);
         Route::get('analysis/{user}', [AdminTaskController::class, 'userTaskAnalysis']); //checked
+    
+        // assigned task list 
+        Route::get('/assign/tasks',[TaskAssignmentController::class,'allAssignTasks']);    
     });
 
-    Route::get('/tasks/assign/{taskId}/{token}', [TaskAssignmentController::class, 'assignTask'])->where('token', '.*'); // part of assignTaskToUser
-    Route::patch('/tasks/assign/{taskId}', [TaskAssignmentController::class, 'assignTaskUpdates']); 
+
 });
 
+Route::get('/tasks/assign/{taskId}/{token}', [TaskAssignmentController::class, 'assignTask'])->where('token', '.*'); // part of assignTaskToUser
+Route::patch('/tasks/assign/{taskId}', [TaskAssignmentController::class, 'assignTaskUpdates']); 
 
 
 Route::post('/register', [AuthController::class, 'register']);
