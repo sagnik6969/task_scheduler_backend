@@ -67,7 +67,6 @@ class UserTaskController extends Controller
         try {
             $task = Task::findOrFail($id);
             return new TaskResource($task, 'show');
-
         } catch (\Exception $e) {
             return response()->json(['message' => 'task not found'], 404);
         }
@@ -98,11 +97,9 @@ class UserTaskController extends Controller
             $task->update($data->validated());
             $task->refresh();
             return new TaskResource($task, 'update');
-
         } catch (\Exception $e) {
             return response()->json(['message' => 'internal server error']);
         }
-
     }
 
     public function destroy(string $id)
@@ -132,7 +129,6 @@ class UserTaskController extends Controller
                 response()->json(['error' => 'User not provided'], 400);
             } else
                 $user = User::findOrFail(request()->query('user_id'));
-
         }
 
 
