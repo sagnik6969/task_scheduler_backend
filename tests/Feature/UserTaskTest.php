@@ -84,4 +84,102 @@ class UserTaskTest extends TestCase
             ]
         ]);
     }
+    public function test_a_user_can_update_task()
+    {
+        $this->withoutExceptionHandling();
+        $user = User::factory()->create();
+        $task = Task::factory()->create(['user_id' => $user->id]);
+        $taskid = $task->id;
+        $response = $this->actingAs($user)->put("/api/user/tasks/" . $taskid, [
+            'title' => 'Test Task',
+            'description' => 'This is a test task.',
+            'deadline' => '2024-02-29 12:00:00',
+            'is_completed' => true,
+            'progress' => 50,
+            'priority' => 'Normal',
+            'user_id' => $user->id,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'data' => [
+                'type' => 'update',
+                'attributes' => [
+                    'title' => 'Test Task',
+                    'description' => 'This is a test task.',
+                    'deadline' => '2024-02-29 12:00:00',
+                    'is_completed' => true,
+                    'progress' => 50,
+                    'priority' => 'Normal',
+                    'user_id' => $user->id,
+                ],
+            ],
+        ]);
+    }
+    public function test_a_user_can_delete_task()
+    {
+        $this->withoutExceptionHandling();
+        $user = User::factory()->create();
+        $task = Task::factory()->create(['user_id' => $user->id]);
+        $taskid = $task->id;
+        $response = $this->actingAs($user)->delete("/api/user/tasks/" . $taskid);
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Task deleted',
+        ]);
+    }
+    public function test_a_user_can_see_task()
+    {
+        $this->withoutExceptionHandling();
+        $user = User::factory()->create();
+        $task = Task::factory()->create(['user_id' => $user->id]);
+        $taskid = $task->id;
+        $response = $this->actingAs($user)->get("/api/user/tasks/" . $taskid);
+        $response->assertStatus(200);
+        $response->assertJson([
+            'data' => [
+                'type' => 'show',
+                'attributes' => [
+                    'title' => $task->title,
+                    'description' => $task->description,
+                    'deadline' => $task->deadline->format('Y-m-d H:i:s'),
+                    'is_completed' => (bool)$task->is_completed,
+                    'progress' => $task->progress,
+                    'priority' => $task->priority,
+                    'user_id' => $task->user_id,
+                    'admin_id' => $task->admin_id,
+                    'created_at' => $task->created_at->toISOString(),
+                    'updated_at' => $task->updated_at->toISOString(),
+                ],
+            ],
+        ]);
+    }
+    public function test_a_user_can_calculate_overall_efficiency()
+    {
+        $this->withoutExceptionHandling();
+        $user = User::factory()->create();
+        Task::factory()->count(3)->create(['user_id' => $user->id, 'is_completed' => true]);
+        $response = $this->actingAs($user)->get("/api/user/efficiency");
+        $response->assertStatus(200);
+        $response->assertJson([
+            'total_tasks' => 3,
+            'average_efficiency' => 5,
+            'overall_efficiency_rating' => 'Excellent',
+        ]);
+    }
+    public function test_user_tasks_analysis_completed_vs_pending_tasks()
+    {
+        $user = User::factory()->create();
+        Task::factory()->count(3)->create(['user_id' => $user->id, 'is_completed' => true]);
+        Task::factory()->count(2)->create(['user_id' => $user->id, 'is_completed' => false]);
+
+        $response = $this->actingAs($user)
+            ->get("/api/user/analysis?statistics=completed_vs_pending_tasks&time_range=all");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'series' => [3, 2],
+                'labels' => ['Completed Tasks', 'Incomplete Tasks']
+            ]);
+    }
 }
