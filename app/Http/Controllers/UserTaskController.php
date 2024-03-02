@@ -17,8 +17,6 @@ use Illuminate\Support\Facades\Validator;
 
 class UserTaskController extends Controller
 {
-
-
     public function index()
     {
         try {
@@ -58,10 +56,6 @@ class UserTaskController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    //one task
     public function show(string $id)
     {
         try {
@@ -71,7 +65,6 @@ class UserTaskController extends Controller
             return response()->json(['message' => 'task not found'], 404);
         }
     }
-
 
     public function update(Request $request, string $id)
     {
@@ -238,6 +231,7 @@ class UserTaskController extends Controller
             'success' => 'all unread notifications are marked as read'
         ]);
     }
+
     public function calculateOverallEfficiency()
     {
         $user = auth()->user();
