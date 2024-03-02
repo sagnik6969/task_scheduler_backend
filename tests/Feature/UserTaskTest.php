@@ -182,4 +182,38 @@ class UserTaskTest extends TestCase
                 'labels' => ['Completed Tasks', 'Incomplete Tasks']
             ]);
     }
+    public function test_user_tasks_analysis_task_distribution_by_progress()
+    {
+        $user = User::factory()->create();
+        Task::factory()->count(1)->create(['user_id' => $user->id, 'progress' => 10, 'is_completed' => false]);
+        Task::factory()->count(2)->create(['user_id' => $user->id, 'progress' => 30, 'is_completed' => false]);
+        Task::factory()->count(3)->create(['user_id' => $user->id, 'progress' => 60, 'is_completed' => false]);
+        Task::factory()->count(4)->create(['user_id' => $user->id, 'progress' => 80, 'is_completed' => false]);
+        Task::factory()->count(5)->create(['user_id' => $user->id, 'progress' => 100, 'is_completed' => true]);
+
+        $response = $this->actingAs($user)
+            ->get("/api/user/analysis?statistics=task_distribution_by_progress&time_range=all");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'series' => [1, 2, 3, 4, 5],
+                'labels' => ['Less than 25%', 'From 25% to 50%', 'From 51% to 75%', 'More than 75%', 'Completed']
+            ]);
+    }
+    public function test_user_tasks_analysis_task_distribution_by_priority()
+    {
+        $user = User::factory()->create();
+        Task::factory()->count(3)->create(['user_id' => $user->id, 'priority' => 'Normal']);
+        Task::factory()->count(2)->create(['user_id' => $user->id, 'priority' => 'Important']);
+        Task::factory()->count(1)->create(['user_id' => $user->id, 'priority' => 'Very Important']);
+
+        $response = $this->actingAs($user)
+            ->get("/api/user/analysis?statistics=task_distribution_by_priority&time_range=all");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'series' => [3, 2, 1],
+                'labels' => ['Normal', 'Important', 'Very Important']
+            ]);
+    }
 }
