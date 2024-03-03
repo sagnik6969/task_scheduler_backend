@@ -18,6 +18,9 @@ class UserController extends Controller
     }
     public function destroy(User $user)
     {
+        if (auth()->user()->id != $user->id && auth()->user()->is_admin == 0) {
+            return response()->json(['error' => 'Unauthorized'], 400);
+        }
         // Delete the user along with their tasks
         $user->adminassigntasks()->delete();
         $user->tasks()->delete();

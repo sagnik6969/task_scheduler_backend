@@ -39,21 +39,20 @@ class AuthController extends Controller
     {
         $id = $request->id;
         $hash = $request->hash;
-        $user = User::findOrFail($id);
+        $user = User::find($id);
 
-        if (!hash_equals(sha1($user->getEmailForVerification()), (string) $hash)) {
-            throw new AuthorizationException();
-        }
+        if (!$user)
+            return abort(404, 'user not found');
+
+        if (!hash_equals(sha1($user->getEmailForVerification()), (string) $hash))
+            return abort(422, 'invalid email verification link');
 
         if (!$user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
-
             return redirect(env('FRONTEND_URL', 'http://localhost:5173') . '/login?message=Email verified successfully. Please login using your registered email address and password');
 
         } else
-            return abort('email already verified');
-
-        // return redirect('/verify-email/' . $id . '/' . $hash);
+            return redirect(env('FRONTEND_URL', 'http://localhost:5173') . '/login?message=Email already verified');
     }
 
     public function login(Request $request)

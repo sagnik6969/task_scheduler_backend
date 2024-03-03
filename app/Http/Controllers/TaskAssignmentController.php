@@ -118,7 +118,7 @@ class TaskAssignmentController extends Controller
                 ->orderBy('updated_at', 'desc')->get();
             return AdminAssignTasksResource::collection($assignTasks);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e], 500);
+            return response()->json(['error' => 'something went wrong'], 500);
         }
     }
 }
