@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('tasks', [AdminTaskController::class, 'index']); //checked -> required
         Route::delete('tasks/{task}', [AdminTaskController::class, 'destroy']); //checked  -> required
         Route::post('assign-task/{user}', [AdminTaskController::class, 'assignTaskToUser']); // ->required
-        Route::get('users/{user}', [AdminTaskController::class, 'userTasks']); // checked //required
+        Route::get('users/{user}', [AdminTaskController::class, 'singleUserWithTasks']); // checked //required
         Route::patch('users/{user}', [AdminTaskController::class, 'makeAdmin']); // checked //required
         // Route::get('users', [UserController::class, 'index']); // no need as 1st route is giving same functionality
         Route::delete('users/{user}', [UserController::class, 'destroy']); // checked ->required
