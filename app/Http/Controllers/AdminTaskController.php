@@ -118,7 +118,7 @@ class AdminTaskController extends Controller
         // of task status as like user accepted or not and other creativity so no need to save it will be user if user accept it then it will be save
         // and automatic admin can see in his dashboard for that refer TaskAssignmentController.php 
         // $task->save();
-        return response()->json(['message' => `Task Detailes are sent successfully to {$user->name}`]);
+        return response()->json(['message' => "Task Detailes are sent successfully to {$user->name}"]);
     }
 
     // public function allUSerAnalysys()
