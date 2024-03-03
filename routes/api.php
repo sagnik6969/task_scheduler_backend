@@ -36,7 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('tasks', [AdminTaskController::class, 'index']); //checked -> required
         Route::delete('tasks/{task}', [AdminTaskController::class, 'destroy']); //checked  -> required
-        Route::post('assign-task/{user}', [AdminTaskController::class, 'assignTaskToUser']); // ->required
+        Route::post('assign-task/{user}', [TaskAssignmentController::class, 'assignTaskToUser']); // ->required
         Route::get('users/{user}', [AdminTaskController::class, 'singleUserWithTasks']); // checked //required
         Route::patch('users/{user}', [AdminTaskController::class, 'makeAdmin']); // checked //required
         // Route::get('users', [UserController::class, 'index']); // no need as 1st route is giving same functionality
@@ -50,12 +50,12 @@ Route::middleware('auth:sanctum')->group(function () {
         // Route::get('analysis/{user}', [AdminTaskController::class, 'userTaskAnalysis']); //checked
 
         // assigned task list 
-        Route::get('/assign/tasks', [TaskAssignmentController::class, 'allAssignTasks']);
+        Route::get('/assign/tasks', [TaskAssignmentController::class, 'getAllAssignedTasksFromAdminsEnd']);
     });
 });
 
-Route::get('/tasks/assign/{taskId}/{token}', [TaskAssignmentController::class, 'assignTask'])->where('token', '.*'); // part of assignTaskToUser
-Route::patch('/tasks/assign/{taskId}', [TaskAssignmentController::class, 'assignTaskUpdates']);
+Route::get('/tasks/assign/{taskId}/{token}', [TaskAssignmentController::class, 'getAssignedTaskFromUsersEndWhenTaskIsPending'])->where('token', '.*'); // part of assignTaskToUser
+Route::patch('/tasks/assign/{taskId}', [TaskAssignmentController::class, 'acceptOrRejectAssignedTask']);
 
 
 Route::post('/register', [AuthController::class, 'register']);

@@ -84,42 +84,6 @@ class AdminTaskController extends Controller
     //     return response()->json(['total_tasks_assigned' => $totalTasks]);
     // }
 
-    public function assignTaskTouser(Request $request, User $user)
-    {
-
-        $task = Validator::make($request->all(), [
-            'title' => 'required|min:10',
-            'description' => 'sometimes',
-            'deadline' => 'required|date',
-            'is_completed' => 'sometimes',
-            'progress' => 'sometimes',
-            'priority' => 'required|in:' . implode(',', array_values(Task::$priorities))
-        ]);
-
-        if ($task->fails()) {
-            return response()->json(['errors' => $task->errors()], 400);
-        }
-
-        $task = new AdminAssignTask();
-        $task->title = $request->title;
-        $task->description = $request->description;
-        $task->deadline = \Carbon\Carbon::parse($request->deadline);
-        // $task->deadline = $request->deadline;
-        $task->admin_id = auth()->user()->id;
-        $task->user_id = $user->id;
-        $task->priority = $request->priority;
-        $task->save();
-
-
-        $token = Str::random(60);
-        $user->notify(new TaskAssginmentNotification($task, $token));
-
-        // here may be we need to make another migration specially for task assigned by admin which will help to create section
-        // of task status as like user accepted or not and other creativity so no need to save it will be user if user accept it then it will be save
-        // and automatic admin can see in his dashboard for that refer TaskAssignmentController.php 
-        // $task->save();
-        return response()->json(['message' => "Task Detailes are sent successfully to {$user->name}"]);
-    }
 
     // public function allUSerAnalysys()
     // {
