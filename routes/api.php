@@ -55,8 +55,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // pie chart data routes
         Route::get('analysis', [AdminTaskController::class, 'allUSerAnalysys']); // checked
-        Route::get('analysis/all_user_task_progress_analysis', [AdminTaskController::class, 'allUserTaskProgressAnalysis']);
-        Route::get('analysis/{user}', [AdminTaskController::class, 'userTaskAnalysis']); //checked
+        Route::get('analysis/all_user_task_progress_analysis', [AdminTaskController::class, 'allUserTaskProgressAnalysis']); //checked
+        // Route::get('analysis/{user}', [AdminTaskController::class, 'userTaskAnalysis']); //checked
 
         // assigned task list 
         Route::get('/assign/tasks', [TaskAssignmentController::class, 'allAssignTasks']);

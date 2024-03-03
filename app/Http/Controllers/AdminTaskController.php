@@ -33,8 +33,8 @@ class AdminTaskController extends Controller
             $users = User::where('is_admin', 0)
                 ->with('tasks')
                 ->withCount([
-                    'tasks as completed_tasks' => fn(Builder $query) => $query->where('is_completed', 1),
-                    'tasks as incomplete_tasks' => fn(Builder $query) => $query->where('is_completed', 0)
+                    'tasks as completed_tasks' => fn (Builder $query) => $query->where('is_completed', 1),
+                    'tasks as incomplete_tasks' => fn (Builder $query) => $query->where('is_completed', 0)
                 ])
                 ->get();
 
@@ -142,10 +142,6 @@ class AdminTaskController extends Controller
 
         return response()->json($usersData);
     }
-    public function taskAcceptance(User $user, Task $task)
-    {
-    }
-
     public function makeAdmin(User $user)
     {
 
@@ -190,7 +186,6 @@ class AdminTaskController extends Controller
         $authUser = request()->user();
         if (!$authUser->is_admin) {
             return response()->json(['error' => 'Unauthorized'], 401);
-
         }
 
         $response = [
@@ -204,7 +199,6 @@ class AdminTaskController extends Controller
             $response['labels'][] = "From {$start}% to {$end}%";
             $response['series'][] = Task::whereBetween('progress', [$start, $end])
                 ->count();
-
         }
 
         $response['labels'][] = 'Completed';
@@ -249,11 +243,4 @@ class AdminTaskController extends Controller
         // ]);
 
     }
-
-    // public function deleteUser(User $user)
-    // {
-    //     $user->delete();
-    //     return response()->json(['message' => 'User deleted successfully']);
-    // }
-
 }
