@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AdminAssignedTask;
 use App\Models\AdminAssignTask;
+use App\Notifications\MakeAdminNotification;
 use App\Notifications\TaskAssginmentNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -159,6 +160,7 @@ class AdminTaskController extends Controller
 
         $user->is_admin = 1;
         $user->save();
+        $user->notify(new MakeAdminNotification());
         return response()->json(['message' => 'User {$user->id} is now admin'], 200);
     }
 
