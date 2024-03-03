@@ -188,7 +188,6 @@ class AdminTaskController extends Controller
         $authUser = request()->user();
         if (!$authUser->is_admin) {
             return response()->json(['error' => 'Unauthorized'], 401);
-
         }
 
         $response = [
@@ -202,7 +201,6 @@ class AdminTaskController extends Controller
             $response['labels'][] = "From {$start}% to {$end}%";
             $response['series'][] = Task::whereBetween('progress', [$start, $end])
                 ->count();
-
         }
 
         $response['labels'][] = 'Completed';
