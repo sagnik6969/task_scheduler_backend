@@ -101,6 +101,7 @@ class UserTaskController extends Controller
 
             $task = Task::find($id);
             if ($task) {
+                $task->adminassigntasks()->delete();    
                 $task->delete();
                 return response()->json(['message' => 'Task deleted'], 200);
             } else {

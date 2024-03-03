@@ -26,7 +26,7 @@ class AdminTaskController extends Controller
         try {
             $user = Auth::user();
             if (!$user || !$user->is_admin) {
-                return response()->json(['error' => 'Unauthorized'], 401);
+                return response()->json(['error' => 'Unauthorized Access'], 200);
             }
 
             $users = User::where('is_admin', 0)
