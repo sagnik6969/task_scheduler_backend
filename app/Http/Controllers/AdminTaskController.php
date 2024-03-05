@@ -159,16 +159,17 @@ class AdminTaskController extends Controller
             'labels' => []
         ];
 
-        for ($i = 0; $i < 90; $i += 10) {
+        for ($i = 0; $i <= 90; $i += 10) {
             $start = $i == 0 ? $i : $i + 1;
             $end = $i + 10;
             $response['labels'][] = "From {$start}% to {$end}%";
-            $response['series'][] = Task::whereBetween('progress', [$start, $end])
+            $response['series'][] = Task::whereHas('user', fn($q) => $q->where('is_admin', 0))->whereBetween('progress', [$start, $end])
+                ->where('is_completed', 0)
                 ->count();
         }
 
         $response['labels'][] = 'Completed';
-        $response['series'][] = Task::where('is_completed', 1)
+        $response['series'][] = Task::whereHas('user', fn($q) => $q->where('is_admin', 0))->where('is_completed', 1)
             ->count();
 
         return response()->json($response);
