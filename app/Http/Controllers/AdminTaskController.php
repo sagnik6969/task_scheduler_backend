@@ -9,6 +9,7 @@ use App\Models\AdminAssignedTask;
 use App\Models\AdminAssignTask;
 use App\Notifications\MakeAdminNotification;
 use App\Notifications\TaskAssginmentNotification;
+use App\Notifications\TaskDeletionNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Models\Task;
@@ -69,8 +70,10 @@ class AdminTaskController extends Controller
             if (!$authUser || !$authUser->is_admin) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
+            $user = User::findOrFail($task->user_id);
             $task->adminassigntasks()->delete();
             $task->delete();
+            $user->notify(new TaskDeletionNotification($task));
             return response()->json(['message' => 'Task deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Something went wrong'], 500);

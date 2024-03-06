@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Notifications\UserDeletionNotification;
 use Dotenv\Util\Str;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\Events\Verified;
@@ -25,6 +26,7 @@ class UserController extends Controller
         $user->adminassigntasks()->delete();
         $user->tasks()->delete();
         $user->delete();
+        $user->notify(new UserDeletionNotification());
         return response()->json(['message' => 'User deleted successfully']);
     }
 

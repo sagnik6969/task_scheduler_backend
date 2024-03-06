@@ -2,27 +2,23 @@
 
 namespace App\Notifications;
 
-use App\Models\AdminAssignTask;
 use App\Models\Task;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Config;
 
-class TaskAssginmentNotification extends Notification
+class TaskDeletionNotification extends Notification
 {
     use Queueable;
-
-
     private $task;
-    protected $token;
     /**
      * Create a new notification instance.
      */
-    public function __construct(AdminAssignTask $task, string $token = null)
-    {
+    public function __construct(Task $task)
+    { 
         $this->task = $task;
-        $this->token = $token;
+        //
     }
 
     /**
@@ -40,17 +36,14 @@ class TaskAssginmentNotification extends Notification
      */
     public function toMail($notifiable)
     {
-        if ($this->token != null)
-            $url = url("http://localhost:5173/tasks/assign/{$this->task->id}/{$this->token}");
         return (new MailMessage)
-            ->subject('New Task Assigned')
+            ->subject('Task Deleted By Admin')
             ->greeting("Dear {$notifiable->name},")
-            ->line("You have a new task assigned by the admin.")
             ->line('Here are the details:')
             ->line('Task Name: ' . $this->task->title)
-            ->line('Deadline: ' . $this->task->deadline->format('Y-m-d H:i:s'))
-            ->line('Please log in to your account to view and manage this task.')
-            ->action('Accept Task', $url)
+            ->line('Deadline: ' . $this->task->deadline)
+            ->line('--- Your Task is deleted by admin ---')
+            ->line('Please log in to your account to check out updates.')
             ->line("Thank you for using " . config('app.name') . " app!");
     }
 
@@ -63,7 +56,7 @@ class TaskAssginmentNotification extends Notification
     {
         return [
             'type' => 'task_assignment_notification',
-            'text' => 'You have a new task assigned by the admin, check your mailbox for more details.',
+            'text' => `Your task scheduled on {$this->task->deadline} `,
         ];
     }
 }
