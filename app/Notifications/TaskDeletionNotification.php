@@ -55,7 +55,7 @@ class TaskDeletionNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'type' => 'task_assignment_notification',
+            'type' => 'task_delete_notification',
             'text' => `Your task scheduled on {$this->task->deadline} `,
         ];
     }
