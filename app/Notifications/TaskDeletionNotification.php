@@ -16,7 +16,7 @@ class TaskDeletionNotification extends Notification
      * Create a new notification instance.
      */
     public function __construct(Task $task)
-    { 
+    {
         $this->task = $task;
         //
     }
@@ -36,7 +36,7 @@ class TaskDeletionNotification extends Notification
      */
     public function toMail($notifiable)
     {
-        return (new MailMessage)
+        return(new MailMessage)
             ->subject('Task Deleted By Admin')
             ->greeting("Dear {$notifiable->name},")
             ->line('Here are the details:')
@@ -56,7 +56,7 @@ class TaskDeletionNotification extends Notification
     {
         return [
             'type' => 'task_delete_notification',
-            'text' => `Your task scheduled on {$this->task->deadline} `,
+            'text' => "Your task {$this->task->title} is deleted by admin",
         ];
     }
 }
