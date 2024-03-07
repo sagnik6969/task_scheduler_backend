@@ -12,7 +12,7 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
-    <source>
+    <source>k
         <include>
             <directory>app</directory>
         </include>

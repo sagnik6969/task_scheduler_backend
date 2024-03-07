@@ -17,39 +17,6 @@ class AdminDashBoardTest extends TestCase
      */
     use RefreshDatabase;
 
-    // public function test_unauthenticated_redirected_to_login()
-    // {
-    //     $response = $this->get('/admin');
-
-    //     $response->assertStatus(302);
-
-    //     $response->assertRedirect('/login');
-    // }
-
-
-    // public function test_allows_authenticated_users_to_access_protected_routes()
-    // {
-    //     $user = User::factory()->create();
-    //     $this->actingAs($user);
-
-    //     $response = $this->get('/api/admin');
-
-    //     $response->assertStatus(302);
-
-    //     $response->assertRedirect('/');
-    // }
-
-    // public function test_authenticated_admin_can_access_admin_page()
-    // {
-    //     $this->withoutExceptionHandling();
-    //     $admin = User::factory()->create(['is_admin' => true]);
-
-    //     $this->actingAs($admin);
-
-    //     $response = $this->get('/admin');
-
-    //     $response->assertStatus(200);
-    // }
     public function test_Index()
     {
         $this->withoutExceptionHandling();
@@ -153,46 +120,7 @@ class AdminDashBoardTest extends TestCase
 
         Notification::assertSentTo($user, TaskAssginmentNotification::class);
     }
-    // public function test_alluser_analysis()
-    // {
-    //     // $this->withoutExceptionHandling();
-
-    //     $admin = User::factory()->create(['is_admin' => true]);
-    //     $this->actingAs($admin);
-
-    //     $user1 = User::factory()->create();
-    //     $user2 = User::factory()->create();
-
-    //     Task::factory()->create(['user_id' => $user1->id, 'is_completed' => true]);
-    //     Task::factory()->create(['user_id' => $user1->id, 'is_completed' => false]);
-    //     Task::factory()->create(['user_id' => $user2->id, 'is_completed' => true]);
-    //     Task::factory()->create(['user_id' => $user2->id, 'is_completed' => false]);
-
-    //     $response = $this->get('/api/admin/index');
-    //     $response->assertStatus(200);
-    //     $response->assertJson([
-    //         [
-    //             'id' => $user1->id,
-    //             'name' => $user1->name,
-    //             'email' => $user1->email,
-    //             'is_admin' => 0,
-    //             'created_at' => $user1->created_at->toISOString(),
-    //             'updated_at' => $user1->updated_at->toISOString(),
-    //             'incomplete_task_count' => 1,
-    //             'complete_task_count' => 1,
-    //         ],
-    //         [
-    //             'id' => $user2->id,
-    //             'name' => $user2->name,
-    //             'email' => $user2->email,
-    //             'is_admin' => 0,
-    //             'created_at' => $user2->created_at->toISOString(),
-    //             'updated_at' => $user2->updated_at->toISOString(),
-    //             'incomplete_task_count' => 1,
-    //             'complete_task_count' => 1,
-    //         ],
-    //     ]);
-    // }
+    
     public function test_make_Admin()
     {
         $this->withoutExceptionHandling();

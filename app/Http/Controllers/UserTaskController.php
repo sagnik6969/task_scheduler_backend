@@ -41,6 +41,7 @@ class UserTaskController extends Controller
             'progress' => 'sometimes',
             'priority' => 'required|in:' . implode(',', array_values(Task::$priorities)),
         ]);
+        
         if ($data->fails()) {
             return response()->json(['errors' => $data->errors()], 422);
         }
@@ -83,13 +84,14 @@ class UserTaskController extends Controller
                 'progress' => 'sometimes',
                 'priority' => 'sometimes|in:' . implode(',', array_values(Task::$priorities)),
             ]);
+
             if ($data->fails()) {
                 return response()->json($data->errors(), 422);
             }
 
             $task->update($data->validated());
             $task->refresh();
-            return new TaskResource($task, 'update');
+            return new TaskResource($task, 'update');  
         } catch (\Exception $e) {
             return response()->json(['message' => 'internal server error']);
         }

@@ -22,7 +22,6 @@ class AdminTaskController extends Controller
 {
     public function index()
     {
-
         try {
             $user = Auth::user();
             if (!$user || !$user->is_admin) {
