@@ -34,6 +34,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('admin')->group(function () {
+        Route::get('users', [UserController::class, 'index']);
+
         Route::get('tasks', [AdminTaskController::class, 'index']); //checked -> required
         Route::delete('tasks/{task}', [AdminTaskController::class, 'destroy']); //checked  -> required
         Route::post('assign-task/{user}', [TaskAssignmentController::class, 'assignTaskToUser']); // ->required

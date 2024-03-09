@@ -12,10 +12,27 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+
     public function index()
     {
-        $user = User::all();
-        return response()->json($user);
+        if (!auth()->user()->is_admin) {
+            return response()->json([
+                'error' => 'Unauthorized'
+            ], 400);
+        }
+
+        $users = User::where('is_admin', 0)
+            ->withCount([
+                'tasks as completed_tasks' => fn($query) => $query->where('is_completed', 1),
+                'tasks as incomplete_tasks' => fn($query) => $query->where('is_completed', 0)
+            ])
+            ->get();
+        $processedUsers = [];
+
+        foreach ($users as $user) {
+            $processedUsers[$user->id] = $user;
+        }
+        return response()->json($processedUsers);
     }
     public function destroy(User $user)
     {
