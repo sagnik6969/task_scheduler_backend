@@ -31,7 +31,7 @@ To install the Task Scheduler backend, follow these steps:
 
 1. Clone this repository to your local machine:
    ```
-   git clone https://github.com/your-username/task-scheduler-backend.git
+   git clone https://github.com/sagnik6969/task_scheduler_backend.git
    ```
 
 2. Navigate to the project directory:
